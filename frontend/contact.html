@@ -9,21 +9,20 @@
         body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; }
         
         .contact-hero {
-            /* ✅ pointing to your local image folder */
-background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(44, 62, 80, 0.9)), url('images/home-bg.jpg'); text-align: center;
-            padding: 80px 20px 120px; /* Extra padding at bottom for overlap */
+            background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(44, 62, 80, 0.9)), url('images/home-bg.jpg'); text-align: center;
+            padding: 80px 20px 120px; 
             margin-top: -20px; padding-top: 120px;
             background-size: cover;
         }
-        .contact-hero h1 { font-size: 3rem; margin: 0; }
-        .contact-hero p { opacity: 0.8; margin-top: 10px; }
+        .contact-hero h1 { font-size: 3rem; margin: 0; color: white; }
+        .contact-hero p { opacity: 0.8; margin-top: 10px; color: white; }
 
         .wrapper { max-width: 1000px; margin: -80px auto 50px; padding: 0 20px; }
         
         .contact-card {
             background: white; border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            display: grid; grid-template-columns: 1.2fr 0.8fr; /* Split Layout */
+            display: grid; grid-template-columns: 1.2fr 0.8fr; 
             overflow: hidden;
         }
 
@@ -47,9 +46,8 @@ background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(44, 62, 80, 0.9)), url(
 
         /* RIGHT SIDE: INFO */
         .info-section {
-            /* ✅ pointing to your local image folder */
             background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(44, 62, 80, 0.9)), url('images/home-bg.jpg'); color: white; padding: 40px;
-               background-size: cover;
+            background-size: cover;
             display: flex; flex-direction: column; justify-content: center;
         }
         .info-item { margin-bottom: 30px; display: flex; align-items: flex-start; gap: 15px; }
@@ -66,7 +64,7 @@ background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(44, 62, 80, 0.9)), url(
         .social-btn {
             flex: 1; text-align: center; padding: 10px; border-radius: 8px;
             text-decoration: none; font-weight: bold; color: white; font-size: 0.9rem;
-            transition: 0.3s;
+            transition: 0.3s; cursor: pointer;
         }
         .wa { background: #25D366; } .wa:hover { background: #1ebe57; }
         .em { background: #EA4335; } .em:hover { background: #c0392b; }
@@ -87,8 +85,6 @@ background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(44, 62, 80, 0.9)), url(
             <a href="contact.html" class="nav-btn nav-primary">Contact</a>
             <a href="about.html" class="nav-btn">About</a>
             <a href="store.html" class="nav-btn">Store</a>
-            
-            
             <a href="admin.html" class="nav-btn">Admin Login</a>
         </div>
     </header>
@@ -101,28 +97,7 @@ background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(44, 62, 80, 0.9)), url(
     <div class="wrapper">
         <div class="contact-card">
             
-            
-
-            <div class="info-section">
-                <div class="info-item">
-                    <div class="icon-circle">📍</div>
-                    <div class="info-text">
-                        <h3>Our Location</h3>
-                        <p>Ayurneeds Pharmacy<br>Opp.Formerly Ayurcentral Jalahalli,FIRST Floor H Anjanappa Building 4th Cross Road, VP Rd, Jalahalli Village, Jalahalli, Bhauballi Nagar, Bengaluru, <br>Karnataka 560013</p>
-                    </div>
-                </div>
-                
-
-                <div style="margin-top: 20px; font-weight: bold; margin-bottom: 10px;text-align: center;">Quick Connect:</div>
-                <div class="social-links">
-             <div onclick="openWhatsApp('9900819819')" class="social-btn wa" style="cursor: pointer;">WhatsApp</div>
-    
-               <a href="mphytolinks@gmail.com" class="social-btn em">Email Us</a>
-
-                <a href="tel:+919900819819" class="social-btn ph">Call Now</a>
-                </div>
-              </div>
-               <div class="form-section">
+            <div class="form-section">
                 <h2>Send a Message</h2>
                 <form onsubmit="sendContact(event)">
                     <input type="text" id="cName" placeholder="Your Name" required>
@@ -132,11 +107,31 @@ background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(44, 62, 80, 0.9)), url(
                     <button type="submit" id="submitBtn">🚀 Send Message</button>
                 </form>
             </div>
+
+            <div class="info-section">
+                <div class="info-item">
+                    <div class="icon-circle">📍</div>
+                    <div class="info-text">
+                        <h3>Our Location</h3>
+                        <p>Ayurneeds Pharmacy<br>Opp. Formerly Ayurcentral Jalahalli, FIRST Floor H Anjanappa Building 4th Cross Road, VP Rd, Jalahalli Village, Jalahalli, Bhauballi Nagar, Bengaluru,<br>Karnataka 560013</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; font-weight: bold; margin-bottom: 10px; text-align: center;">Quick Connect:</div>
+                <div class="social-links">
+                    <div onclick="openWhatsApp('9900819819')" class="social-btn wa">WhatsApp</div>
+                    <a href="mailto:mphytolinks@gmail.com" class="social-btn em">Email Us</a>
+                    <a href="tel:+919900819819" class="social-btn ph">Call Now</a>
+                </div>
+            </div>
                               
         </div>
     </div>
 
     <script>
+        // ✅ CORRECT LIVE BACKEND URL
+        const API_URL = "https://ayurneeds-project.vercel.app";
+
         async function sendContact(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
@@ -152,43 +147,38 @@ background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(44, 62, 80, 0.9)), url(
             };
 
             try {
-                const res = await fetch('http://127.0.0.1:8000/contact-us', {
+                // ✅ Using live backend
+                const res = await fetch(`${API_URL}/contact-us`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(payload)
                 });
                 
                 if(res.ok) {
-                    alert("✅ Message Sent! Check your Telegram.");
+                    alert("✅ Message Sent! We will contact you soon.");
                     document.querySelector('form').reset();
                 } else {
-                    alert("Error sending message.");
+                    alert("❌ Error sending message. Please try again.");
                 }
             } catch(err) {
-                alert("Server Error.");
+                console.error(err);
+                alert("❌ Connection Failed. Check your internet.");
             }
+            
             btn.innerText = "✅ Sent!";
             setTimeout(() => { 
                 btn.innerText = originalText; 
                 btn.disabled = false; 
             }, 2000);
         }
-    </script>
-    <script>
-    function openWhatsApp(number) {
-        // 1. Remove any spaces, dashes, plus signs, or text
-        let cleanNumber = number.toString().replace(/\D/g, '');
 
-        // 2. Check if it's an Indian number (10 digits) and add '91'
-        if (cleanNumber.length === 10) {
-            cleanNumber = "91" + cleanNumber;
+        function openWhatsApp(number) {
+            let cleanNumber = number.toString().replace(/\D/g, '');
+            if (cleanNumber.length === 10) {
+                cleanNumber = "91" + cleanNumber;
+            }
+            window.open(`https://wa.me/${cleanNumber}`, '_blank');
         }
-
-        // 3. Open WhatsApp
-        window.open(`https://wa.me/${cleanNumber}`, '_blank');
-    }
-
-    // ... your existing sendContact function is below ...
-</script>
+    </script>
 </body>
 </html>
