@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout | Ayurneeds</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="nav.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 15px rgba(0,0,0,0.05); }
+        
+        /* Table Styling */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: #f8f9fa; color: #555; padding: 12px; text-align: left; border-bottom: 2px solid #ddd; }
+        td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
+        .total-row { font-weight: bold; font-size: 1.2em; background: #e8f5e9; color: #2e7d32; }
+
+        /* Quantity Controls */
+        .qty-controls { display: flex; align-items: center; gap: 5px; }
+        .qty-btn {
+            background: #e2e6ea; border: 1px solid #ced4da; color: #333;
+            width: 28px; height: 28px; border-radius: 4px; font-weight: bold; cursor: pointer;
+        }
+        .qty-val { font-weight: bold; width: 25px; text-align: center; }
+        .cancel-btn { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+
+        /* Form Elements */
+        label { display: block; margin: 15px 0 5px; font-weight: 600; color: #555; }
+        input { width: 100%; padding: 12px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        /* PAYMENT STYLES */
+        #upiSection { display: block; background: #fff; padding: 25px; border-radius: 10px; text-align: center; border: 2px dashed #27ae60; margin-top: 20px; }
+        
+        .pay-link-btn {
+            display: inline-block; background: #e67e22; color: white; text-decoration: none;
+            padding: 15px 30px; border-radius: 30px; font-size: 18px; font-weight: bold;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4); transition: 0.3s;
+        }
+        .pay-link-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(230, 126, 34, 0.6); }
+
+        .txn-input {
+            width: 100%; padding: 12px; border: 2px solid #e67e22; border-radius: 8px; 
+            font-size: 16px; text-align: center; letter-spacing: 1px;
+        }
+
+        .action-btn { width: 100%; padding: 15px; margin-top: 20px; background: #27ae60; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="Ayurneeds Logo"></a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn">Home</a>
+            <a href="store.html" class="nav-btn">Store</a>
+            <a href="about.html" class="nav-btn">About</a>
+            <a href="contact.html" class="nav-btn">Contact</a>
+            <a href="admin.html" class="nav-btn nav-primary">Admin Login</a>
+        </div>
+    </header>
+
+    <div id="verifyOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; text-align:center; padding-top:100px;">
+        <div style="font-size: 60px;">⏳</div>
+        <h2 style="color:#2c3e50;">Verifying Payment...</h2>
+        <p style="font-size:18px; color:#555;">Please wait while we confirm your Transaction ID.</p>
+        <p style="color:#888;">Do not refresh this page.</p>
+        <div style="margin-top:20px; border: 4px solid #f3f3f3; border-top: 4px solid #27ae60; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+        <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+    </div>
+
+    <div class="container">
+        <h2>🛒 Your Shopping Cart</h2>
+        
+        <table id="cartTable">
+            <thead>
+                <tr>
+                    <th style="width: 35%;">Medicine</th>
+                    <th style="width: 15%;">Price</th>
+                    <th style="width: 25%;">Quantity</th>
+                    <th style="width: 15%;">Total</th>
+                    <th style="width: 10%;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="cartBody"></tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="3">Grand Total:</td>
+                    <td colspan="2">₹<span id="grandTotal">0</span></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <button onclick="clearCart()" style="background:#e74c3c; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; margin-top:10px;">🗑 Empty Cart</button>
+
+        <h3>🏠 Delivery Details</h3>
+        
+        <label>Full Name</label>
+        <input type="text" id="pName" placeholder="Receiver's Full Name" required>
+        
+        <label>Mobile Number</label> <input type="tel" id="pPhone" placeholder="Your Phone Number" required>
+
+        <label>Address</label>
+        <input type="text" id="pAddress" placeholder="Full Address (Flat, Street, City)" required>
+        
+        <label>Pincode</label>
+        <input type="number" id="pPincode" placeholder="Pincode" required>
+
+        <div id="upiSection">
+            <p style="font-weight:bold; color:#2c3e50; margin-bottom: 15px;">
+                Step 1: Click button to Pay ₹<span id="displayAmount">0</span>
+            </p>
+            
+            <a id="payBtn" href="#" class="pay-link-btn">
+                🚀 Pay with UPI App
+            </a>
+            
+            <p style="font-size:13px; color:#666; margin-bottom: 5px;">
+                Step 2: Enter Transaction ID (UTR) here:
+            </p>
+            <input type="text" id="txnId" class="txn-input" placeholder="Enter Transaction ID">
+        </div>
+
+        <button onclick="placeStoreOrder()" class="action-btn">✅ Confirm Order</button>
+    </div>
+
+    <script>
+        // 🔴 CONFIG
+        const SHOP_UPI_ID = "9988776655@okaxis"; 
+        const SHOP_NAME = "Ayurneeds Pharmacy";
+        const API_URL = "http://127.0.0.1:8000"; 
+        
+        let cart = JSON.parse(localStorage.getItem('ayurCart')) || [];
+        let totalAmount = 0;
+
+        function renderCart() {
+            const tbody = document.getElementById('cartBody');
+            tbody.innerHTML = "";
+            totalAmount = 0;
+
+            if(cart.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>Cart Empty. <a href='store.html'>Go to Store</a></td></tr>";
+                document.getElementById('grandTotal').innerText = "0";
+                document.getElementById('displayAmount').innerText = "0";
+                document.getElementById('payBtn').style.display = 'none';
+                return;
+            }
+
+            cart.forEach((item, index) => {
+                const lineTotal = item.price * item.qty;
+                totalAmount += lineTotal;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>${item.name}</b></td>
+                    <td>₹${item.price}</td>
+                    <td>
+                        <div class="qty-controls">
+                            <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
+                            <span class="qty-val">${item.qty}</span>
+                            <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                        </div>
+                    </td>
+                    <td>₹${lineTotal}</td>
+                    <td><button class="cancel-btn" onclick="removeItem(${index})">Remove</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('grandTotal').innerText = totalAmount;
+            document.getElementById('displayAmount').innerText = totalAmount;
+            updatePayLink(totalAmount);
+        }
+
+        function updatePayLink(amount) {
+            document.getElementById('payBtn').style.display = 'inline-block';
+            const upiLink = `upi://pay?pa=${SHOP_UPI_ID}&pn=${SHOP_NAME}&am=${amount}&cu=INR`;
+            document.getElementById('payBtn').href = upiLink;
+        }
+
+        function updateQty(index, change) {
+            if (cart[index].qty + change >= 1) {
+                cart[index].qty += change;
+            } else if (confirm("Remove item?")) {
+                cart.splice(index, 1);
+            }
+            saveCart();
+        }
+
+        function removeItem(index) {
+            if(confirm("Remove from cart?")) {
+                cart.splice(index, 1);
+                saveCart();
+            }
+        }
+
+        function clearCart() {
+            if(confirm("Empty cart?")) {
+                cart = [];
+                saveCart();
+            }
+        }
+
+        function saveCart() {
+            localStorage.setItem('ayurCart', JSON.stringify(cart));
+            renderCart();
+        }
+
+        renderCart();
+
+        // 🟢 STORE CHECKOUT LOGIC
+        async function placeStoreOrder() {
+            if(cart.length === 0) return alert("Cart is empty!");
+            
+            const txnId = document.getElementById('txnId').value;
+            const name = document.getElementById('pName').value;
+            const phone = document.getElementById('pPhone').value; // ✅ Capture Phone
+            const address = document.getElementById('pAddress').value;
+            const pincode = document.getElementById('pPincode').value;
+
+            if(!name || !phone || !address || !pincode) return alert("Please fill all details.");
+            if(!txnId) return alert("Please enter Transaction ID.");
+
+            const payload = {
+                patient_name: name,
+                phone: phone, // ✅ Send Phone
+                address_line: address,
+                landmark: "NA",
+                pincode: pincode,
+                payment_mode: `UPI (Txn: ${txnId})`, 
+                final_medicines: cart 
+            };
+
+            const btn = document.querySelector('.action-btn');
+            btn.innerText = "Submitting...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/store/checkout`, {
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+
+                if(res.ok && data.status === "pending_verification") {
+                    document.getElementById('verifyOverlay').style.display = 'block';
+                    startPollingStatus(data.order_id);
+                } else {
+                    alert("Error submitting order.");
+                    btn.disabled = false;
+                }
+            } catch(e) {
+                alert("Network Error.");
+                btn.disabled = false;
+            }
+        }
+
+        // 🔄 POLLING FUNCTION
+        function startPollingStatus(orderId) {
+            const intervalId = setInterval(async () => {
+                try {
+                    const res = await fetch(`${API_URL}/check-order-status/${orderId}`);
+                    const data = await res.json();
+                    
+                    if (data.status === "Ordered") {
+                        clearInterval(intervalId);
+                        localStorage.removeItem('ayurCart'); 
+                        showSuccessScreen();
+                    } else if (data.status === "Payment Failed") {
+                        clearInterval(intervalId);
+                        showFailureScreen();
+                    }
+                } catch(e) { console.log("Polling..."); }
+            }, 3000); 
+        }
+
+        function showSuccessScreen() {
+            document.body.innerHTML = `
+                <div style="text-align:center; padding:80px 20px; font-family:sans-serif;">
+                    <div style="font-size:80px;">🎉</div>
+                    <h1 style="color:#27ae60;">Payment Verified!</h1>
+                    <p>Your store order has been confirmed.</p>
+                    <a href="store.html" class="pay-link-btn" style="background:#2c3e50; font-size:16px;">Continue Shopping</a>
+                </div>
+            `;
+        }
+
+        function showFailureScreen() {
+            document.body.innerHTML = `
+                <div style="text-align:center; padding:80px 20px; font-family:sans-serif;">
+                    <div style="font-size:80px;">❌</div>
+                    <h1 style="color:#c0392b;">Payment Failed</h1>
+                    <p>Admin declined the Transaction ID.</p>
+                    <button onclick="window.location.reload()" style="margin-top:20px; padding:10px 20px; background:#c0392b; color:white; border:none; border-radius:5px; cursor:pointer;">Try Again</button>
+                </div>
+            `;
+        }
+    </script>
+
+</body>
+</html>

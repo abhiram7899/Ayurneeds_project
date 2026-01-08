@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayurneeds | Future of Pharmacy</title>
+    <link rel="stylesheet" href="nav.css">
+    <style>
+        /* GLOBAL RESET & FONTS */
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #333; }
+        
+        /* 1. HERO SECTION */
+        .hero {
+            position: relative;
+            /* ✅ pointing to your local image folder */
+            background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(44, 62, 80, 0.9)), url('images/home-bg.jpg');
+            background-position: center;
+            height: 600px; /* Tall banner */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            background-size: cover;
+            padding: 20px;
+            margin-top: -20px; /* Pull up behind nav */
+            padding-top: 100px; /* Push content down */
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%); /* Slanted bottom edge */
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: slideUp 1s ease-out;
+        }
+
+        .hero-content p {
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+            animation: slideUp 1.2s ease-out;
+        }
+
+        .hero-btn {
+            background: #fff;
+            color: #27ae60;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: 0.3s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            display: inline-block;
+            animation: slideUp 1.4s ease-out;
+        }
+        .hero-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); background: #f1f1f1; }
+
+        /* 2. FLOATING FEATURES CARDS */
+        .features-container {
+            max-width: 1100px;
+            margin: -80px auto 50px; /* Overlap the hero section */
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 0 20px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: 0.3s;
+        }
+        .feature-card:hover { transform: translateY(-10px); }
+        .feature-icon { font-size: 50px; margin-bottom: 20px; display: block; }
+        .feature-title { font-size: 1.5rem; font-weight: bold; color: #2c3e50; margin-bottom: 10px; }
+        .feature-text { color: #666; line-height: 1.6; }
+
+        /* 3. HOW IT WORKS (Timeline) */
+        .steps-section { padding: 80px 20px; text-align: center; background: white; }
+        .section-title { font-size: 2.5rem; color: #2c3e50; margin-bottom: 60px; font-weight: bold; }
+        
+        .steps-grid {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .step-item { flex: 1; min-width: 250px; max-width: 300px; position: relative; }
+        .step-number {
+            background: #27ae60; color: white; width: 40px; height: 40px;
+            border-radius: 50%; font-weight: bold; font-size: 20px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px; box-shadow: 0 0 0 5px rgba(39, 174, 96, 0.2);
+        }
+
+        /* 4. FOOTER */
+        footer {
+            background: #2c3e50; color: white; padding: 60px 20px 20px;
+            text-align: center; margin-top: 50px;
+        }
+        .footer-content { max-width: 800px; margin: 0 auto; display: grid; gap: 20px; }
+        .footer-links a { color: #bdc3c7; text-decoration: none; margin: 0 10px; font-size: 14px; }
+        .footer-links a:hover { color: white; }
+
+        /* Animations */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content h1 { font-size: 2.5rem; }
+            .features-container { margin-top: 20px; }
+            .hero { clip-path: none; height: auto; padding-bottom: 50px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="Ayurneeds Logo"></a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn nav-primary">Home</a>
+            <a href="contact.html" class="nav-btn">Contact</a>
+            <a href="about.html" class="nav-btn">About</a>
+            <a href="store.html" class="nav-btn">Store</a>
+            <a href="admin.html" class="nav-btn">Admin Login</a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Healthcare meets Intelligence</h1>
+            <p>Upload prescriptions, get AI-verified medicines, and pay via UPI instantly. The smartest pharmacy experience in Shivamogga.</p>
+            <a href="store.html" class="hero-btn">🛒 Shop Medicines Now</a>
+        </div>
+    </section>
+
+    <div class="features-container">
+        <div class="feature-card">
+            <span class="feature-icon">📝</span>
+            <div class="feature-title">AI Prescription</div>
+            <div class="feature-text">Our Smart AI reads handwritten doctor notes instantly, fixing spelling mistakes and checking stock.</div>
+        </div>
+        <div class="feature-card">
+            <span class="feature-icon">⚡</span>
+            <div class="feature-title">Instant Checkouts</div>
+            <div class="feature-text">No long queues. Get a direct payment link on WhatsApp and pay securely via UPI QR Code.</div>
+        </div>
+        <div class="feature-card">
+            <span class="feature-icon">🚚</span>
+            <div class="feature-title">Fast Delivery</div>
+            <div class="feature-text">We prioritize local deliveries in Shivamogga, ensuring your meds reach you within hours.</div>
+        </div>
+    </div>
+
+    <section class="steps-section">
+        <h2 class="section-title">How It Works</h2>
+        <div class="steps-grid">
+            <div class="step-item">
+                <div class="step-number">1</div>
+                <h3>Doctor Uploads</h3>
+                <p>Your doctor uploads the handwritten prescription to our secure portal.</p>
+            </div>
+            <div class="step-item">
+                <div class="step-number">2</div>
+                <h3>AI Analyzes</h3>
+                <p>Our system decodes the medicines, checks prices, and sends you a link.</p>
+            </div>
+            <div class="step-item">
+                <div class="step-number">3</div>
+                <h3>You Pay & Relax</h3>
+                <p>Click the link, review your bill, pay via UPI, and wait for delivery!</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <h2>Ayurneeds Pharmacy</h2>
+            <p>Your trusted partner in health and technology.</p>
+            <div class="footer-links">
+                <a href="store.html">Order Medicines</a>
+                <a href="contact.html">Contact Support</a>
+                <a href="about.html">About Us</a>
+                <a href="admin.html">Admin Login</a>
+            </div>
+            <p style="margin-top: 30px; font-size: 12px; color: #7f8c8d;">© 2026 Ayurneeds. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="nav.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Login</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; margin: 0; }
+        .login-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        h2 { color: #2c3e50; margin-bottom: 10px; }
+        p { color: #666; margin-bottom: 20px; font-size: 14px; }
+        
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        input:focus { border-color: #27ae60; outline: none; }
+        
+        .btn { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background: #219150; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        .error-msg { color: #e74c3c; font-size: 14px; margin-top: 15px; display: none; background: #fde8e8; padding: 10px; border-radius: 5px; border: 1px solid #fcc; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="Ayurneeds Logo"></a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn">Home</a>
+            <a href="store.html" class="nav-btn">Store</a>
+            <a href="about.html" class="nav-btn">About</a>
+            <a href="contact.html" class="nav-btn">Contact</a>
+            <span class="nav-btn nav-primary">Logged In</span>
+        </div>
+    </header>
+
+<div class="login-card">
+    <h2>🔐 Secure Access</h2>
+    <p>For security, please enter your registered mobile number to view your prescription.</p>
+
+    <input type="tel" id="phoneInput" placeholder="Enter Phone Number" onkeypress="handleEnter(event)">
+    <button id="loginBtn" class="btn" onclick="verifyAndLogin()">View Prescription</button>
+
+    <div id="errorBox" class="error-msg"></div>
+</div>
+
+<script>
+    // 1. Point to your Backend (Localhost or Render URL)
+    const API_URL = "http://127.0.0.1:8000"; 
+    
+    // 2. Get the Prescription ID from the link
+    const urlParams = new URLSearchParams(window.location.search);
+    const presId = urlParams.get('id');
+
+    // Allow pressing "Enter" key to login
+    function handleEnter(e) {
+        if(e.key === 'Enter') verifyAndLogin();
+    }
+
+    async function verifyAndLogin() {
+        const phone = document.getElementById('phoneInput').value;
+        const errorBox = document.getElementById('errorBox');
+        const btn = document.getElementById('loginBtn');
+
+        // Clear previous errors
+        errorBox.style.display = 'none';
+        
+        if (!presId) { 
+            showError("Invalid Link. Please ask the doctor to resend it."); 
+            return; 
+        }
+        if (!phone) { 
+            showError("Please enter your phone number."); 
+            return; 
+        }
+
+        // Show loading state
+        btn.innerText = "Verifying...";
+        btn.disabled = true;
+
+        try {
+            // Call Backend to check number
+            const response = await fetch(`${API_URL}/verify-patient/${presId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: phone })
+            });
+
+            if (response.ok) {
+                // ✅ MATCH FOUND! Redirect immediately
+                window.location.href = `patient_dashboard.html?id=${presId}`;
+            } else {
+                // ❌ NO MATCH
+                showError("⚠️ Number not registered. Please enter the number given to the doctor.");
+                btn.innerText = "View Prescription";
+                btn.disabled = false;
+            }
+        } catch (err) {
+            showError("❌ Server Error. Please check your internet connection.");
+            btn.innerText = "View Prescription";
+            btn.disabled = false;
+        }
+    }
+
+    function showError(msg) {
+        const box = document.getElementById('errorBox');
+        box.innerText = msg;
+        box.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>

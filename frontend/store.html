@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Store | Ayurneeds</title>
+    <link rel="stylesheet" href="nav.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; }
+        
+        /* 1. HEADER AREA */
+        .store-header {
+            /* ✅ pointing to your local image folder */
+            background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(44, 62, 80, 0.9)), url('images/home-bg.jpg');
+            height: 300px;
+            text-align: center;
+            color: white;
+            background-size: cover; /* Offset nav */
+            padding-top: 100px;
+            margin-top: -20px;
+            
+        }
+        .store-header h1 { margin: 0; font-size: 2.5rem; }
+        .store-header p { opacity: 0.9; margin-top: 10px; font-size: 1.1rem; }
+
+        /* 2. SEARCH BAR */
+        .search-container {
+            max-width: 600px; margin: -25px auto 40px; 
+            padding: 0 20px; position: relative; z-index: 10;
+        }
+        .search-box {
+            width: 100%; padding: 15px 25px; border-radius: 50px;
+            border: none; font-size: 16px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); outline: none;
+            transition: 0.3s;
+        }
+        .search-box:focus { box-shadow: 0 8px 25px rgba(39, 174, 96, 0.2); transform: scale(1.02); }
+
+        /* 3. PRODUCT GRID */
+        .grid-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
+
+        .card {
+            background: white; border-radius: 15px; padding: 20px;
+            text-align: center; position: relative; overflow: hidden;
+            transition: 0.3s; border: 1px solid #f0f0f0;
+        }
+        .card:hover { transform: translateY(-7px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); border-color: #27ae60; }
+        
+        .medicine-icon { font-size: 40px; margin-bottom: 15px; display: inline-block; background: #e8f5e9; width: 80px; height: 80px; line-height: 80px; border-radius: 50%; color: #27ae60; }
+        
+        .card h3 { color: #2c3e50; margin: 10px 0; font-size: 1.2rem; }
+        .price { color: #27ae60; font-weight: bold; font-size: 1.4rem; margin: 10px 0; }
+        
+        .add-btn {
+            background: #2c3e50; color: white; border: none; padding: 10px 20px;
+            border-radius: 25px; cursor: pointer; font-weight: bold; width: 100%;
+            transition: 0.2s; margin-top: 10px;
+        }
+        .add-btn:hover { background: #27ae60; transform: scale(1.05); }
+
+        /* 4. FLOATING CART BUTTON */
+        .floating-cart {
+            position: fixed; bottom: 30px; right: 30px;
+            background: #e67e22; color: white;
+            padding: 15px 25px; border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(230, 126, 34, 0.4);
+            text-decoration: none; font-weight: bold; font-size: 1.1rem;
+            display: flex; align-items: center; gap: 10px; z-index: 100;
+            transition: 0.3s;
+        }
+        .floating-cart:hover { transform: translateY(-3px); background: #d35400; }
+        .badge { background: white; color: #e67e22; padding: 2px 8px; border-radius: 10px; font-size: 0.9rem; }
+        /* Replace the old .medicine-icon style with this */
+.image-container {
+    width: 100%;
+    height: 150px; /* Fixed height for uniformity */
+    overflow: hidden;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Keeps the whole medicine visible */
+    transition: transform 0.3s;
+}
+
+.card:hover img {
+    transform: scale(1.1); /* Zoom effect on hover */
+}
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="Ayurneeds Logo"></a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn">Home</a>
+            <a href="contact.html" class="nav-btn">Contact</a>
+            <a href="about.html" class="nav-btn">About</a>
+            
+            <a href="store.html" class="nav-btn nav-primary">Store</a>
+            
+            
+            <a href="admin.html" class="nav-btn">Admin Login</a>
+        </div>
+    </header>
+
+    <div class="store-header">
+        <h1>Essential Medicines</h1>
+        <p>Genuine Products. Best Prices. Home Delivered.</p>
+    </div>
+
+    <div class="search-container">
+        <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search for medicines (e.g., Dolo, Syrup)..." onkeyup="filterProducts()">
+    </div>
+
+    <div class="grid-container">
+        <div class="grid" id="productGrid">
+            <p style="text-align:center; width:100%;">Loading inventory...</p>
+        </div>
+    </div>
+
+    <a href="store_checkout.html" class="floating-cart">
+        🛒 View Cart <span class="badge" id="cartCount">0</span>
+    </a>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('ayurCart')) || [];
+        let allProducts = []; // Store products locally for searching
+        updateCartCount();
+
+        // Load Products
+        async function loadProducts() {
+            try {
+                const res = await fetch('http://127.0.0.1:8000/store/all-medicines');
+                allProducts = await res.json();
+                renderGrid(allProducts);
+            } catch(e) {
+                document.getElementById('productGrid').innerHTML = "<p>Error connecting to store.</p>";
+            }
+        }
+        loadProducts();
+
+        // Render Cards
+        function renderGrid(products) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = "";
+            
+            if(products.length === 0) {
+                grid.innerHTML = "<p>No medicines found.</p>";
+                return;
+            }
+
+            products.forEach(prod => {
+                // ✅ Logic: Use the DB image, or fallback to default if missing
+                const imgFile = prod.image ? `images/medicines/${prod.image}` : `images/medicines/default.jpg`;
+
+                const card = document.createElement('div');
+                card.className = "card";
+                card.innerHTML = `
+                    <div class="image-container">
+                        <img src="${imgFile}" alt="${prod.name}" onerror="this.src='images/medicines/default.jpg'">
+                    </div>
+                    <h3>${prod.name}</h3>
+                    <div class="price">₹${prod.price}</div>
+                    <button class="add-btn" onclick="addToCart('${prod.name}', ${prod.price})">Add to Cart +</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Search Logic
+        function filterProducts() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query));
+            renderGrid(filtered);
+        }
+
+        function addToCart(name, price) {
+            const existing = cart.find(item => item.name === name);
+            if(existing) {
+                existing.qty++;
+            } else {
+                cart.push({ name: name, price: price, qty: 1 });
+            }
+            saveCart();
+            
+            // Visual Feedback
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "✅ Added";
+            btn.style.background = "#27ae60";
+            setTimeout(() => { 
+                btn.innerText = originalText; 
+                btn.style.background = "#2c3e50"; 
+            }, 1000);
+        }
+
+        function saveCart() {
+            localStorage.setItem('ayurCart', JSON.stringify(cart));
+            updateCartCount();
+        }
+
+        function updateCartCount() {
+            const total = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cartCount').innerText = total;
+        }
+    </script>
+</body>
+</html>

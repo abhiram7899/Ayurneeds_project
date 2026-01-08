@@ -1,0 +1,73 @@
+/* GLOBAL NAVIGATION STYLES */
+header {
+    background: rgba(255, 255, 255, 0.98);
+    padding: 10px 50px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    position: fixed; 
+    width: 100%; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-sizing: border-box;
+}
+
+.logo { 
+    display: flex; 
+    align-items: center; 
+    text-decoration: none;
+}
+
+.logo img {
+    height: 50px; /* Adjust this to make your logo bigger/smaller */
+    width: auto;
+}
+
+.nav-links {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.nav-btn {
+    text-decoration: none; 
+    color: #333; 
+    font-weight: 600; 
+    padding: 8px 15px;
+    transition: 0.3s; 
+    border-radius: 20px;
+    font-size: 16px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.nav-btn:hover { 
+    background: #f0f2f5; 
+    color: #27ae60; 
+}
+
+.nav-primary {
+    background: #27ae60; 
+    color: white !important; 
+    padding: 8px 20px;
+    box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+}
+
+.nav-primary:hover { 
+    background: #219150; 
+    transform: translateY(-2px); 
+}
+
+/* Push content down so it doesn't hide behind the fixed header */
+body { 
+    padding-top: 100px !important; 
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    header { padding: 10px 20px; flex-direction: column; gap: 10px; }
+    .nav-links { gap: 5px; flex-wrap: wrap; justify-content: center; }
+    body { padding-top: 140px !important; }
+    
+}

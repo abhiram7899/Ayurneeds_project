@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | Ayurneeds</title>
+    <link rel="stylesheet" href="nav.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f9f9f9; margin: 0; padding: 0; }
+
+        /* 1. HERO SECTION (Top Banner) */
+        .hero-section {
+            /* This uses the same background as your home page */
+            background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(44, 62, 80, 0.9)), url('images/home-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            margin-top: -20px; /* Offset nav padding */
+        }
+        .hero-text h1 { font-size: 3.5rem; margin-bottom: 10px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
+        .hero-text p { font-size: 1.2rem; font-weight: 300; letter-spacing: 1px; }
+
+        /* 2. STORY SECTION */
+        .container { max-width: 1000px; margin: 0 auto; padding: 50px 20px; }
+        
+        .story-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 50px; 
+            align-items: center; 
+            margin-bottom: 80px;
+        }
+        
+        .story-content h2 { color: #27ae60; font-size: 2rem; margin-bottom: 20px; }
+        .story-content p { color: #555; line-height: 1.8; font-size: 1.1rem; margin-bottom: 20px; }
+        
+        /* Image with styling */
+        .story-img { 
+            width: 100%; 
+            border-radius: 20px; 
+            box-shadow: 20px 20px 0px rgba(39, 174, 96, 0.1); 
+            transition: 0.3s;
+        }
+        .story-img:hover { transform: translateY(-5px); box-shadow: 25px 25px 0px rgba(39, 174, 96, 0.2); }
+
+        /* 3. PHOTO GALLERY */
+        .gallery-title { text-align: center; font-size: 2rem; color: #2c3e50; margin-bottom: 40px; }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .gallery-item {
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            height: 250px;
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .gallery-item:hover img { transform: scale(1.1); } /* Zoom Effect */
+
+        /* 4. MAP SECTION */
+        .map-section { margin-top: 80px; text-align: center; }
+        iframe {
+            width: 100%;
+            height: 450px;
+            border: 0;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .story-grid { grid-template-columns: 1fr; }
+            .hero-text h1 { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="Ayurneeds Logo"></a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn">Home</a>
+            <a href="contact.html" class="nav-btn">Contact</a>
+            <a href="about.html" class="nav-btn nav-primary">About</a>
+            <a href="store.html" class="nav-btn">Store</a>
+            
+            <a href="admin.html" class="nav-btn">Admin Login</a>
+        </div>
+    </header>
+
+    <div class="hero-section">
+        <div class="hero-text">
+            <h1>Our Story</h1>
+            <p>Serving Shivamogga with Care & Technology</p>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div class="story-grid">
+            <div class="story-content">
+                <h2>Blending Tradition with Technology</h2>
+                <p>Welcome to <strong>Ayurneeds Pharmacy</strong>. Established in 2020 in the heart of Shivamogga, we started with a simple mission: to make genuine medicines accessible to everyone.</p>
+                <p>Today, we are proud to be a <strong>Smart Pharmacy</strong>. By using Artificial Intelligence for prescription reading and UPI for seamless payments, we ensure that your experience is fast, safe, and contact-free.</p>
+                <p>Whether you visit our store or order online, our commitment to your health remains our top priority.</p>
+            </div>
+            <div>
+                <img src="images/story-image.jpg" class="story-img" alt="Ayurneeds Store Front" onerror="this.src='https://images.unsplash.com/photo-1585435557343-3b092031a831?w=800'">
+            </div>
+        </div>
+
+        <h2 class="gallery-title">Inside Our Store</h2>
+        <div class="gallery-grid">
+            <div class="gallery-item">
+                <img src="images/gallery-1.jpg" alt="Medicine Shelves" onerror="this.src='https://images.unsplash.com/photo-1576602976047-174e57a47881?w=600'">
+            </div>
+            <div class="gallery-item">
+                <img src="images/gallery-2.jpg" alt="Customer Service" onerror="this.src='https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=600'">
+            </div>
+            <div class="gallery-item">
+                <img src="images/gallery-3.jpg" alt="Ayurvedic Section" onerror="this.src='https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=600'">
+            </div>
+            <div class="gallery-item">
+                <img src="images/gallery-4.jpg" alt="Safety First" onerror="this.src='https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600'">
+            </div>
+        </div>
+
+        <div class="map-section">
+            <h2 class="gallery-title">📍 Visit Us</h2>
+            
+            
+            <iframe
+  width="600"
+  height="450"
+  style="border:0"
+  loading="lazy"
+  allowfullscreen
+  src="https://maps.google.com/maps?q=AYURNEEDS%20Jalahalli%20Bengaluru&t=&z=15&ie=UTF8&iwloc=&output=embed">
+</iframe>
+        </div>
+
+    </div>
+
+</body>
+</html>
