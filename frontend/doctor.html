@@ -11,6 +11,10 @@
         .logo { font-size: 24px; font-weight: bold; color: #2c3e50; text-align: center; margin-bottom: 20px; }
         h3 { text-align: center; color: #34495e; margin-top: 0; }
         input[type="text"], input[type="file"] { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        
+        /* Highlight labels for camera inputs */
+        .input-label { font-weight: 600; display: block; margin-bottom: 5px; color: #555; font-size: 14px; }
+        
         .dropdown-check-list { display: inline-block; width: 100%; position: relative; }
         .dropdown-check-list .anchor { position: relative; cursor: pointer; display: block; padding: 12px; border: 1px solid #ddd; border-radius: 5px; background: white; text-align: left; color: #555; }
         .dropdown-check-list .anchor:after { position: absolute; content: ""; border-left: 2px solid black; border-top: 2px solid black; padding: 4px; right: 15px; top: 30%; transform: rotate(-135deg); transition: 0.3s; }
@@ -54,7 +58,12 @@
 
         <div style="background: #f9f9f9; padding: 15px; border-radius: 10px; border: 1px dashed #ccc; margin-top: 15px;">
             <h4 style="margin-top:0;">📸 Option A: Upload Prescription</h4>
-            <input type="file" id="rxImage" accept="image/*" style="margin-bottom:0;">
+            
+            <label class="input-label">📂 Upload from Gallery:</label>
+            <input type="file" id="galleryInput" accept="image/*" style="margin-bottom:15px;">
+
+            <label class="input-label">📷 Or Take a Photo:</label>
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" style="margin-bottom:0;">
         </div>
 
         <div class="or-divider">OR</div>
@@ -127,9 +136,19 @@
         });
 
         async function submitPrescription() {
-            const fileInput = document.getElementById('rxImage');
+            // ✅ UPDATED: Get both inputs
+            const galleryInput = document.getElementById('galleryInput');
+            const cameraInput = document.getElementById('cameraInput');
             const phone = document.getElementById('patientPhone').value;
             const status = document.getElementById('statusMessage');
+
+            // ✅ Determine which file to use (prioritize camera if both are present, though rare)
+            let fileToUpload = null;
+            if (cameraInput.files.length > 0) {
+                fileToUpload = cameraInput.files[0];
+            } else if (galleryInput.files.length > 0) {
+                fileToUpload = galleryInput.files[0];
+            }
 
             const checkboxes = document.querySelectorAll('.med-checkbox:checked');
             let manualMeds = [];
@@ -138,8 +157,10 @@
             });
 
             if (!phone) { alert("Please enter Patient Phone Number"); return; }
-            if (fileInput.files.length === 0 && manualMeds.length === 0) {
-                alert("Please either Upload an Image OR Select Medicines.");
+            
+            // ✅ Updated Validation: Check if we have a file (from either source) OR manual meds
+            if (!fileToUpload && manualMeds.length === 0) {
+                alert("Please either Upload an Image, Take a Photo, OR Select Medicines.");
                 return;
             }
 
@@ -148,9 +169,12 @@
 
             const formData = new FormData();
             formData.append('manual_phone', phone);
-            if (fileInput.files.length > 0) {
-                formData.append('file', fileInput.files[0]);
+            
+            // ✅ Attach the selected file if it exists
+            if (fileToUpload) {
+                formData.append('file', fileToUpload);
             }
+            
             formData.append('manual_medicines', JSON.stringify(manualMeds));
 
             try {
@@ -169,7 +193,11 @@
                     `;
                     status.className = "status success";
                     document.getElementById('patientPhone').value = "";
-                    fileInput.value = "";
+                    
+                    // Clear both inputs
+                    galleryInput.value = "";
+                    cameraInput.value = "";
+                    
                     checkboxes.forEach(c => c.checked = false);
                 } else {
                     status.innerHTML = `❌ Error: ${data.detail || "Server Rejected"}`;
