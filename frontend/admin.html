@@ -8,82 +8,31 @@
     <style>
         /* GLOBAL SETTINGS */
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
-        
-        /* LAYOUT CONTAINER */
-        .admin-wrapper {
-            display: none; /* Hidden until login */
-            max-width: 1000px;
-            margin: 50px auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-            overflow: hidden;
-            display: none; 
-            grid-template-columns: 1fr 1fr;
-            min-height: 600px;
-        }
-
-        /* LEFT SIDE: FORM */
+        .admin-wrapper { display: none; max-width: 1000px; margin: 50px auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); overflow: hidden; grid-template-columns: 1fr 1fr; min-height: 600px; }
         .form-section { padding: 50px; display: flex; flex-direction: column; justify-content: center; }
         .form-section h2 { color: #2c3e50; font-size: 2rem; margin-bottom: 10px; }
         .form-section p { color: #7f8c8d; margin-bottom: 30px; }
-
         .input-group { margin-bottom: 20px; position: relative; }
         .input-group label { display: block; font-weight: 600; color: #34495e; margin-bottom: 8px; font-size: 0.9rem; }
-        .input-group input { 
-            width: 100%; padding: 15px; border: 2px solid #ecf0f1; 
-            border-radius: 10px; font-size: 1rem; transition: 0.3s; box-sizing: border-box;
-        }
+        .input-group input { width: 100%; padding: 15px; border: 2px solid #ecf0f1; border-radius: 10px; font-size: 1rem; transition: 0.3s; box-sizing: border-box; }
         .input-group input:focus { border-color: #27ae60; outline: none; background: #f9fffb; }
-
-        .generate-btn {
-            width: 100%; padding: 15px; background: #27ae60; color: white;
-            border: none; border-radius: 10px; font-size: 1.1rem; font-weight: bold;
-            cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
-        }
+        .generate-btn { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3); }
         .generate-btn:hover { background: #219150; transform: translateY(-2px); }
-
-        /* RIGHT SIDE: VISUALS */
-        .visual-section {
-            background: linear-gradient(135deg, #2c3e50 0%, #27ae60 100%);
-            color: white; padding: 50px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; position: relative; overflow: hidden;
-        }
+        .visual-section { background: linear-gradient(135deg, #2c3e50 0%, #27ae60 100%); color: white; padding: 50px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; }
         .visual-content { position: relative; z-index: 2; }
         .visual-content h1 { font-size: 2.5rem; margin-bottom: 20px; }
         .visual-content p { font-size: 1.1rem; opacity: 0.9; line-height: 1.6; }
         .admin-icon { font-size: 80px; margin-bottom: 20px; display: block; }
-        
-        /* DECORATIVE CIRCLES */
         .circle { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.1); }
         .c1 { width: 200px; height: 200px; top: -50px; left: -50px; }
         .c2 { width: 300px; height: 300px; bottom: -100px; right: -50px; }
-
-        /* SUCCESS CARD (Hidden by default) */
-        .success-card {
-            margin-top: 30px; background: #e8f8f5; border: 2px dashed #27ae60;
-            padding: 20px; border-radius: 10px; text-align: center; display: none;
-            animation: slideDown 0.5s ease;
-        }
+        .success-card { margin-top: 30px; background: #e8f8f5; border: 2px dashed #27ae60; padding: 20px; border-radius: 10px; text-align: center; display: none; animation: slideDown 0.5s ease; }
         .success-card h3 { color: #27ae60; margin: 0 0 10px; }
-        .link-box {
-            background: white; padding: 10px; border-radius: 5px; border: 1px solid #ddd;
-            font-family: monospace; color: #555; word-break: break-all; margin-bottom: 10px; font-size: 14px;
-        }
-        .copy-btn {
-            background: #2c3e50; color: white; border: none; padding: 8px 20px;
-            border-radius: 5px; cursor: pointer; font-size: 0.9rem;
-        }
+        .link-box { background: white; padding: 10px; border-radius: 5px; border: 1px solid #ddd; font-family: monospace; color: #555; word-break: break-all; margin-bottom: 10px; font-size: 14px; }
+        .copy-btn { background: #2c3e50; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; }
         .copy-btn:hover { background: #34495e; }
-
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .admin-wrapper { grid-template-columns: 1fr; margin: 20px; }
-            .visual-section { padding: 40px 20px; }
-        }
+        @media (max-width: 768px) { .admin-wrapper { grid-template-columns: 1fr; margin: 20px; } .visual-section { padding: 40px 20px; } }
     </style>
 </head>
 <body>
@@ -147,7 +96,9 @@
     </div>
 
     <script>
-        // 🔒 SECURITY CHECK
+        // ✅ Live Render Backend URL
+        const API_URL = "https://ayurneeds-project.onrender.com";
+
         window.onload = function() {
             if (sessionStorage.getItem("admin_access") === "true") {
                 showAdmin();
@@ -164,7 +115,6 @@
         };
 
         function showAdmin() {
-            // Change display from 'none' to 'grid' to enable the layout
             document.getElementById("adminContent").style.display = "grid";
         }
 
@@ -176,13 +126,12 @@
 
             if(!name || !phone) { alert("Please fill Name and Phone."); return; }
 
-            // Loading State
             btn.innerText = "Generating...";
             btn.disabled = true;
             btn.style.background = "#95a5a6";
             
             try {
-                const response = await fetch("http://127.0.0.1:8000/register-doctor/", {
+                const response = await fetch(`${API_URL}/register-doctor/`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
@@ -199,11 +148,9 @@
                 // Construct Link
                 const magicLink = `${window.location.origin}${window.location.pathname.replace('admin.html', 'doctor.html')}?id=${data.unique_uuid}`;
 
-                // Show Success Card
                 document.getElementById('successArea').style.display = "block";
                 document.getElementById('linkBox').innerText = magicLink;
                 
-                // Reset Button
                 btn.innerText = "✨ Generate Another";
                 btn.disabled = false;
                 btn.style.background = "#27ae60";

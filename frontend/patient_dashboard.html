@@ -9,45 +9,23 @@
         body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; padding: 20px; }
         .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; color: #2c3e50; }
-        
-        /* Table Styling */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 600px; }
         th { background: #f8f9fa; color: #555; padding: 12px; text-align: left; border-bottom: 2px solid #ddd; }
         td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
-        
-        /* Quantity Controls */
         .qty-controls { display: flex; align-items: center; gap: 8px; }
-        .qty-btn {
-            background: #e2e6ea; border: 1px solid #ced4da; color: #333;
-            width: 30px; height: 30px; border-radius: 5px; font-weight: bold; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .qty-btn { background: #e2e6ea; border: 1px solid #ced4da; color: #333; width: 30px; height: 30px; border-radius: 5px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .qty-val { font-weight: bold; width: 25px; text-align: center; }
         .cancel-btn { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
         .total-row { font-weight: bold; font-size: 1.2em; background: #e8f5e9; color: #2e7d32; }
-        
-        /* Form & Layout */
         label { display: block; margin: 15px 0 5px; font-weight: 600; color: #555; }
         input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        
         .action-btn { width: 100%; padding: 15px; margin-top: 20px; background: #27ae60; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .action-btn:hover { background: #219150; }
-
-        /* PAYMENT SECTION */
         #upiSection { display: block; background: #fff; padding: 25px; border-radius: 10px; text-align: center; border: 2px dashed #27ae60; margin-top: 30px; }
-        
-        .pay-link-btn {
-            display: inline-block; background: #25D366; color: white; text-decoration: none;
-            padding: 15px 30px; border-radius: 30px; font-size: 18px; font-weight: bold;
-            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); transition: 0.3s;
-        }
+        .pay-link-btn { display: inline-block; background: #25D366; color: white; text-decoration: none; padding: 15px 30px; border-radius: 30px; font-size: 18px; font-weight: bold; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); transition: 0.3s; }
         .pay-link-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6); }
-
-        .txn-input {
-            width: 100%; padding: 12px; border: 2px solid #27ae60; border-radius: 8px; 
-            font-size: 16px; text-align: center; letter-spacing: 1px; margin-top: 10px;
-        }
+        .txn-input { width: 100%; padding: 12px; border: 2px solid #27ae60; border-radius: 8px; font-size: 16px; text-align: center; letter-spacing: 1px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -133,7 +111,9 @@
     // 🔴 CONFIGURATION
     const SHOP_UPI_ID = "9988776655@okaxis"; 
     const SHOP_NAME = "Ayurneeds Pharmacy";
-    const API_URL = "http://127.0.0.1:8000"; 
+    
+    // ✅ Live Render Backend URL
+    const API_URL = "https://ayurneeds-project.onrender.com"; 
     
     const presId = new URLSearchParams(window.location.search).get('id');
     let currentMedicines = []; 
@@ -243,10 +223,7 @@
             });
 
             if(res.ok) {
-                // ✅ 1. SHOW WAITING SCREEN (Do not show success yet)
                 document.getElementById('verifyOverlay').style.display = 'block';
-                
-                // ✅ 2. START POLLING (Ask backend every 3 seconds)
                 startPollingStatus();
             } else { throw new Error("Server Error"); }
         } catch(err) {
@@ -263,14 +240,14 @@
                 const data = await res.json();
                 
                 if (data.status === "Ordered") {
-                    clearInterval(intervalId); // Stop Checking
-                    showSuccessScreen();       // Show Success
+                    clearInterval(intervalId);
+                    showSuccessScreen();
                 } else if (data.status === "Payment Failed") {
                     clearInterval(intervalId);
-                    showFailureScreen();       // Show Failure
+                    showFailureScreen();
                 }
             } catch(e) { console.log("Polling..."); }
-        }, 3000); // Check every 3 seconds
+        }, 3000); 
     }
 
     function showSuccessScreen() {

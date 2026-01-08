@@ -10,37 +10,21 @@
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .logo { font-size: 24px; font-weight: bold; color: #2c3e50; text-align: center; margin-bottom: 20px; }
         h3 { text-align: center; color: #34495e; margin-top: 0; }
-        
         input[type="text"], input[type="file"] { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        
-        /* Custom Dropdown Styling */
         .dropdown-check-list { display: inline-block; width: 100%; position: relative; }
-        .dropdown-check-list .anchor {
-            position: relative; cursor: pointer; display: block; padding: 12px;
-            border: 1px solid #ddd; border-radius: 5px; background: white; text-align: left; color: #555;
-        }
-        .dropdown-check-list .anchor:after {
-            position: absolute; content: ""; border-left: 2px solid black; border-top: 2px solid black;
-            padding: 4px; right: 15px; top: 30%; transform: rotate(-135deg); transition: 0.3s;
-        }
+        .dropdown-check-list .anchor { position: relative; cursor: pointer; display: block; padding: 12px; border: 1px solid #ddd; border-radius: 5px; background: white; text-align: left; color: #555; }
+        .dropdown-check-list .anchor:after { position: absolute; content: ""; border-left: 2px solid black; border-top: 2px solid black; padding: 4px; right: 15px; top: 30%; transform: rotate(-135deg); transition: 0.3s; }
         .dropdown-check-list.visible .anchor:after { transform: rotate(45deg); top: 40%; }
-        
-        .dropdown-check-list ul.items {
-            padding: 0; display: none; margin: 5px 0 0 0; border: 1px solid #ddd; border-radius: 5px;
-            max-height: 200px; overflow-y: scroll; background: #fff; position: absolute; width: 100%; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+        .dropdown-check-list ul.items { padding: 0; display: none; margin: 5px 0 0 0; border: 1px solid #ddd; border-radius: 5px; max-height: 200px; overflow-y: scroll; background: #fff; position: absolute; width: 100%; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .dropdown-check-list ul.items li { list-style: none; padding: 10px; border-bottom: 1px solid #eee; }
         .dropdown-check-list ul.items li:hover { background: #f9f9f9; }
         .dropdown-check-list.visible ul.items { display: block; }
-        
         .or-divider { margin: 20px 0; font-weight: bold; color: #999; text-align: center; position: relative; }
         .or-divider:before, .or-divider:after { content: ""; height: 1px; background: #ddd; position: absolute; top: 50%; width: 40%; }
         .or-divider:before { left: 0; }
         .or-divider:after { right: 0; }
-
         button { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         button:hover { background: #219150; }
-
         .status { margin-top: 20px; padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; display: none; }
         .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; display: block; }
         .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; display: block; }
@@ -91,7 +75,9 @@
     </div>
 
     <script>
-        // 1. Get Doctor ID from URL
+        // ✅ Live Render Backend URL
+        const API_URL = "https://ayurneeds-project.onrender.com";
+
         const urlParams = new URLSearchParams(window.location.search);
         const doctorUuid = urlParams.get('id');
 
@@ -99,15 +85,13 @@
             document.body.innerHTML = "<h2 style='text-align:center; color:red; margin-top:50px;'>🚫 Invalid Access Link</h2><p style='text-align:center;'>Please use the link provided by Admin.</p>";
         }
 
-        // 2. Load Medicine List on Page Load
         async function loadMedicines() {
             try {
-                // Fetch from the NEW endpoint that checks Real Stock
-                const res = await fetch('http://127.0.0.1:8000/doctor/medicine-list');
+                const res = await fetch(`${API_URL}/doctor/medicine-list`);
                 const meds = await res.json();
                 
                 const listContainer = document.getElementById('medicineCheckboxes');
-                listContainer.innerHTML = ""; // Clear loading text
+                listContainer.innerHTML = ""; 
 
                 if(meds.length === 0) {
                     listContainer.innerHTML = "<li style='color:red;'>No medicines found in Pharmacy Network.</li>";
@@ -116,7 +100,6 @@
 
                 meds.forEach(med => {
                     const li = document.createElement("li");
-                    // Value is just the name, backend assigns "Standard" qty
                     li.innerHTML = `<label style="cursor:pointer; display:block;"><input type="checkbox" value="${med}" class="med-checkbox"> ${med}</label>`;
                     listContainer.appendChild(li);
                 });
@@ -126,10 +109,8 @@
             }
         }
         
-        // Run immediately
         loadMedicines(); 
 
-        // Toggle Dropdown Visibility
         function toggleDropdown() {
             const checkList = document.getElementById('list1');
             if (checkList.classList.contains('visible'))
@@ -138,7 +119,6 @@
                 checkList.classList.add('visible');
         }
 
-        // Close dropdown if clicked outside
         document.addEventListener('click', function(e) {
             const checkList = document.getElementById('list1');
             if (!checkList.contains(e.target)) {
@@ -146,13 +126,11 @@
             }
         });
 
-        // 3. Submit Logic
         async function submitPrescription() {
             const fileInput = document.getElementById('rxImage');
             const phone = document.getElementById('patientPhone').value;
             const status = document.getElementById('statusMessage');
 
-            // Collect Checked Medicines
             const checkboxes = document.querySelectorAll('.med-checkbox:checked');
             let manualMeds = [];
             checkboxes.forEach((checkbox) => {
@@ -160,8 +138,6 @@
             });
 
             if (!phone) { alert("Please enter Patient Phone Number"); return; }
-            
-            // Check if at least ONE thing is provided (Image OR Manual List)
             if (fileInput.files.length === 0 && manualMeds.length === 0) {
                 alert("Please either Upload an Image OR Select Medicines.");
                 return;
@@ -172,17 +148,13 @@
 
             const formData = new FormData();
             formData.append('manual_phone', phone);
-            
-            // Append Image if exists
             if (fileInput.files.length > 0) {
                 formData.append('file', fileInput.files[0]);
             }
-            
-            // Append Manual List (as a string)
             formData.append('manual_medicines', JSON.stringify(manualMeds));
 
             try {
-                const response = await fetch(`http://127.0.0.1:8000/upload-prescription/${doctorUuid}`, {
+                const response = await fetch(`${API_URL}/upload-prescription/${doctorUuid}`, {
                     method: 'POST',
                     body: formData
                 });
@@ -196,12 +168,9 @@
                         <p>Patient will be notified on <b>${phone}</b> once approved.</p>
                     `;
                     status.className = "status success";
-                    
-                    // Reset Form
                     document.getElementById('patientPhone').value = "";
                     fileInput.value = "";
                     checkboxes.forEach(c => c.checked = false);
-                    
                 } else {
                     status.innerHTML = `❌ Error: ${data.detail || "Server Rejected"}`;
                     status.className = "status error";
