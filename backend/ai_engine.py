@@ -9,42 +9,44 @@ API_KEY = os.getenv("GOOGLE_API_KEY")
 def get_available_model():
     """Asks Google which models are enabled for this API Key"""
     try:
+        # 1. Ask Google for the list
         url = f"https://generativelanguage.googleapis.com/v1beta/models?key={API_KEY}"
         response = requests.get(url)
         data = response.json()
         
-        # 1. Debug: Print ALL available models to the Vercel Logs
-        print(f"📋 AVAILABLE MODELS FOR THIS KEY: {json.dumps(data)}")
-        
         if "models" not in data:
-            return None
+            return "gemini-2.5-flash" # Default fallback
 
-        # 2. Priority List (Try to find the best one that exists)
-        # We prefer Flash (fast), then Pro (smart), then Vision (old reliable)
+        # 2. Priority List (Updated for YOUR specific account)
+        # We now prioritize the 2.5 and 2.0 models you actually have access to.
         priority_order = [
-            "gemini-1.5-flash",
-            "gemini-1.5-pro",
-            "gemini-1.5-flash-latest",
-            "gemini-1.0-pro-vision",
-            "gemini-pro-vision"
+            "gemini-2.5-flash",       # ✅ Your best model
+            "gemini-2.0-flash",       # ✅ Backup
+            "gemini-2.5-pro",         # ✅ Slow but smart
+            "gemini-2.0-flash-lite",  # ✅ Super fast
+            "gemini-1.5-flash"        # ❌ (Old, likely missing)
         ]
         
+        # Clean up the names (remove "models/" prefix)
         available_names = [m['name'].replace("models/", "") for m in data['models']]
         
+        # 3. Find the best match
         for p in priority_order:
             if p in available_names:
                 print(f"✅ Auto-Selected Model: {p}")
                 return p
                 
-        # 3. Fallback: Just pick the first one that supports generation
-        if available_names:
-            print(f"⚠️ specific match failed. Using fallback: {available_names[0]}")
-            return available_names[0]
+        # 4. Fallback: Pick the first model that is NOT an 'embedding' or 'aqa' model
+        for name in available_names:
+            if "embedding" not in name and "aqa" not in name:
+                print(f"⚠️ Specific match failed. Using generic fallback: {name}")
+                return name
             
-        return None
+        return "gemini-2.5-flash"
+
     except Exception as e:
         print(f"⚠️ Model Discovery Failed: {e}")
-        return "gemini-1.5-flash" # Blind guess if discovery fails
+        return "gemini-2.5-flash" 
 
 def analyze_prescription(image_bytes):
     if not API_KEY:
@@ -52,17 +54,11 @@ def analyze_prescription(image_bytes):
         return []
 
     try:
-        # 1. Auto-Detect the correct model
         model_name = get_available_model()
-        if not model_name:
-            print("❌ Error: No AI models found for this API Key.")
-            return []
-
         print(f"🔍 AI Engine: Sending Request to {model_name}...")
 
         image_b64 = base64.b64encode(image_bytes).decode('utf-8')
 
-        # 2. Use the discovered model in the URL
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={API_KEY}"
         
         headers = {'Content-Type': 'application/json'}
@@ -88,14 +84,15 @@ def analyze_prescription(image_bytes):
 
         result = response.json()
         try:
-            raw_text = result['candidates'][0]['content']['parts'][0]['text']
-            print(f"✅ AI Raw Response: {raw_text}")
-            
-            match = re.search(r'\[.*\]', raw_text, re.DOTALL)
-            if match:
-                return json.loads(match.group())
-            else:
-                return []
+            # Handle different response structures if 2.5 behaves differently
+            if 'candidates' in result:
+                raw_text = result['candidates'][0]['content']['parts'][0]['text']
+                print(f"✅ AI Raw Response: {raw_text}")
+                
+                match = re.search(r'\[.*\]', raw_text, re.DOTALL)
+                if match:
+                    return json.loads(match.group())
+            return []
         except Exception as e:
             print(f"⚠️ Parsing Error: {e}")
             return []
