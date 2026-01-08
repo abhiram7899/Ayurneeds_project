@@ -2,6 +2,7 @@ import os
 import google.generativeai as genai
 import json
 import mimetypes
+import PIL.Image
 
 # 1. Configure API Key
 API_KEY = os.getenv("GOOGLE_API_KEY")
