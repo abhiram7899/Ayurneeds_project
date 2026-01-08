@@ -21,8 +21,8 @@ import ai_engine
 # ⚙️ CONFIGURATION
 # ==========================================
 # 🔴 DATABASE
-# ✅ FIX 1: Username is 'postgres.peutakneeduffikaovvz' (Not just 'postgres')
-# ✅ FIX 2: Added '?sslmode=require' at the end
+# ✅ FIX: Username MUST contain the project ID for the pooler to work
+# ✅ FIX: SSL mode MUST be enabled
 SQLALCHEMY_DATABASE_URL = "postgresql://postgres.peutakneeduffikaovvz:Ayurneeds2026Project@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require"
 # 🔴 TELEGRAM KEYS
 TELEGRAM_BOT_TOKEN = "8593706542:AAG_EsJxPZiqLQddiMgAlhSinxtaJO-hswI"
