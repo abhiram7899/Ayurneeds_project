@@ -25,7 +25,7 @@ import ai_engine
 # Note 1: Host changed to 'aws-0-ap-south-1.pooler.supabase.com'
 # Note 2: Username changed to 'postgres.peutakneeduffikaovvz' (Required for this host)
 # Note 3: Port is 6543
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres.peutakneeduffikaovvz:Ayurneeds2026Project@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require"
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres.peutakneeduffikaovvz:Ayurneeds2026@aws-1-ap-south-1.pooler.supabase.com:6543/postgres"
 # 🔴 TELEGRAM KEYS
 TELEGRAM_BOT_TOKEN = "8593706542:AAG_EsJxPZiqLQddiMgAlhSinxtaJO-hswI"
 TELEGRAM_CHAT_ID = "6293824721"
