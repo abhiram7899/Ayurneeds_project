@@ -7,4 +7,3 @@ requests
 google-generativeai
 pillow
 thefuzz
-psycopg2-binary
