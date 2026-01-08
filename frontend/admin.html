@@ -103,7 +103,7 @@
             if (sessionStorage.getItem("admin_access") === "true") {
                 showAdmin();
             } else {
-                const password = prompt("🔒 Enter Admin Password (admin123):");
+                const password = prompt("🔒 Enter Admin Password:");
                 if (password === "admin123") { 
                     sessionStorage.setItem("admin_access", "true");
                     showAdmin();
