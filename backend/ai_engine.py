@@ -1,36 +1,48 @@
 import os
 import google.generativeai as genai
 import json
+import mimetypes
 
-# 1. Get the key from Vercel's Environment Variables
+# 1. Configure API Key
 API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# 2. Check if the key exists
 if not API_KEY:
-    print("❌ ERROR: GOOGLE_API_KEY is missing from Environment Variables!")
+    print("❌ ERROR: GOOGLE_API_KEY is missing!")
 else:
-    # 3. Configure the AI
     genai.configure(api_key=API_KEY)
 
 def analyze_prescription(image_path):
     try:
-        # Load the model
+        # 2. Determine Mime Type (jpg, png, etc.)
+        mime_type, _ = mimetypes.guess_type(image_path)
+        if not mime_type:
+            mime_type = "image/jpeg" # Default fallback
+
+        # 3. Read the file as raw bytes (No upload step needed)
+        with open(image_path, "rb") as f:
+            image_data = f.read()
+
+        # 4. Prepare the Data Payload
+        image_part = {
+            "mime_type": mime_type,
+            "data": image_data
+        }
+
+        # 5. Initialize Model
         model = genai.GenerativeModel('gemini-1.5-flash')
+
+        # 6. Send Request
+        prompt = "Extract all medicine names from this prescription image. Return ONLY a JSON list of strings, like this: [\"Medicine A\", \"Medicine B\"]. Do not add any markdown formatting."
         
-        # Load the image
-        myfile = genai.upload_file(image_path)
+        response = model.generate_content([prompt, image_part])
         
-        # Ask the AI
-        result = model.generate_content(
-            [myfile, "\n\n", "Extract all medicine names from this prescription image. Return ONLY a JSON list of strings, like this: [\"Medicine A\", \"Medicine B\"]. Do not add any markdown formatting or extra text."]
-        )
+        # 7. Clean and Parse Response
+        clean_text = response.text.strip()
         
-        # Clean the text to ensure it's valid JSON
-        clean_text = result.text.strip()
-        # Remove markdown code blocks if present (```json ... ```)
+        # Remove markdown code blocks if present
         if clean_text.startswith("```"):
             clean_text = clean_text.replace("```json", "").replace("```", "")
-        
+            
         return json.loads(clean_text)
 
     except Exception as e:
