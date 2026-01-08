@@ -7,7 +7,8 @@ import re
 # ======================================================
 # 🔴 STEP 1: PASTE YOUR KEY INSIDE THE QUOTES BELOW
 # ======================================================
-API_KEY = "AIzaSyDCMqS_WJC2Dk1E9_KnW_h3DORdc1taol4"
+# ✅ CORRECT: Reads from the secret vault
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 # Safety Check
 if API_KEY == "PASTE_YOUR_REAL_API_KEY_HERE" or API_KEY == "":
