@@ -21,8 +21,11 @@ import ai_engine
 # ⚙️ CONFIGURATION
 # ==========================================
 # 🔴 DATABASE
-# ✅ Vercel Fix: Port 5432 + SSL Mode
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:Ayurneeds2026Project@db.peutakneeduffikaovvz.supabase.co:5432/postgres?sslmode=require"
+# ✅ FIX: Using IPv4 Pooler Hostname (Mumbai Region)
+# Note 1: Host changed to 'aws-0-ap-south-1.pooler.supabase.com'
+# Note 2: Username changed to 'postgres.peutakneeduffikaovvz' (Required for this host)
+# Note 3: Port is 6543
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres.peutakneeduffikaovvz:Ayurneeds2026Project@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require"
 # 🔴 TELEGRAM KEYS
 TELEGRAM_BOT_TOKEN = "8593706542:AAG_EsJxPZiqLQddiMgAlhSinxtaJO-hswI"
 TELEGRAM_CHAT_ID = "6293824721"
