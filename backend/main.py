@@ -7,7 +7,6 @@ from sqlalchemy.orm import sessionmaker, Session, relationship
 from typing import List, Optional
 from pydantic import BaseModel
 import datetime
-import shutil
 import os
 import json
 import requests
@@ -21,9 +20,6 @@ import ai_engine
 # ⚙️ CONFIGURATION
 # ==========================================
 # 🔴 DATABASE
-# ✅ CORRECTED HOST: aws-1-ap-south-1.pooler.supabase.com
-# ✅ CORRECTED USER: postgres.peutakneeduffikaovvz
-# ✅ REQUIRED: Port 6543 + SSL Mode
 SQLALCHEMY_DATABASE_URL = "postgresql://postgres.peutakneeduffikaovvz:Ayurneeds2026Project@aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require"
 # 🔴 TELEGRAM KEYS
 TELEGRAM_BOT_TOKEN = "8593706542:AAG_EsJxPZiqLQddiMgAlhSinxtaJO-hswI"
@@ -31,13 +27,7 @@ TELEGRAM_CHAT_ID = "6293824721"
 
 # 🔴 LIVE SERVER URLS
 RENDER_BACKEND_URL = "https://ayurneeds-project.vercel.app"
-LIVE_WEBSITE_URL = "https://www.ayurneeds.com"
-
-# ✅ Vercel Fix: Use the temporary directory
-import tempfile
-
-UPLOAD_DIR = tempfile.gettempdir()
-# No need to makedirs, /tmp always exists
+LIVE_WEBSITE_URL = "https://ayurneeds-frontend.vercel.app"
 
 # ==========================================
 # 🗄️ DATABASE SETUP
@@ -201,9 +191,9 @@ def register_doctor(doctor: DoctorCreate, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "success", "unique_uuid": new_uuid}
 
-# 2. DOCTOR UPLOAD
+# 2. DOCTOR UPLOAD (UPDATED FOR IN-MEMORY PROCESSING)
 @app.post("/upload-prescription/{doctor_uuid}")
-def upload_prescription(
+async def upload_prescription(
     doctor_uuid: str, file: UploadFile = File(None), 
     manual_phone: str = Form(...), manual_medicines: str = Form("[]"), 
     db: Session = Depends(get_db)
@@ -211,25 +201,32 @@ def upload_prescription(
     doctor = db.query(Doctor).filter(Doctor.uuid_code == doctor_uuid).first()
     if not doctor: raise HTTPException(404, "Invalid Doctor")
     
-    filename = "manual"
+    filename = "manual_entry"
     ai_results = []
     
     if file:
         filename = file.filename
-        loc = f"{UPLOAD_DIR}/{filename}"
-        with open(loc, "wb") as buffer: shutil.copyfileobj(file.file, buffer)
         try:
-            analysis = ai_engine.analyze_prescription_image(loc)
-            ai_results = analysis.get("medicines", [])
-        except: ai_results = []
+            # ✅ READ FILE INTO MEMORY (No saving to disk)
+            contents = await file.read()
+            # ✅ SEND RAW BYTES TO AI ENGINE
+            ai_results = ai_engine.analyze_prescription(contents)
+        except Exception as e:
+            print(f"Upload Error: {e}")
+            ai_results = []
 
     try: 
         manual = [{"name": m, "qty": "Standard"} for m in json.loads(manual_medicines)]
     except: 
         manual = []
 
-    final_list = ai_results + manual
-    if not final_list: raise HTTPException(400, "No medicines found.")
+    # Format AI results to match manual structure
+    ai_formatted = [{"name": m, "qty": "Standard"} for m in ai_results] if isinstance(ai_results, list) else []
+
+    final_list = ai_formatted + manual
+    
+    if not final_list: 
+        raise HTTPException(400, "No medicines found.")
 
     clean_phone = manual_phone.replace(" ", "").strip()
 

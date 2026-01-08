@@ -2,6 +2,7 @@ import os
 import google.generativeai as genai
 import json
 import PIL.Image
+import io
 import re
 
 # 1. Configure API Key
@@ -12,35 +13,33 @@ if not API_KEY:
 else:
     genai.configure(api_key=API_KEY)
 
-def analyze_prescription(image_path):
+def analyze_prescription(image_bytes):
     try:
-        print(f"🔍 AI Engine: Processing file at {image_path}")
-        img = PIL.Image.open(image_path)
+        print("🔍 AI Engine: Received image data in memory")
+        
+        # 2. Open image directly from memory (No file path needed)
+        image_stream = io.BytesIO(image_bytes)
+        img = PIL.Image.open(image_stream)
         
         model = genai.GenerativeModel('gemini-1.5-flash')
         
-        # 2. Stronger Prompt
+        # 3. Strong Prompt
         prompt = (
-            "You are a pharmacist assistant. "
-            "Extract all medicine names from this image. "
-            "Return ONLY a raw JSON list of strings. "
-            "Example output: [\"Dolo 650\", \"Pan 40\"]. "
-            "Do not write any other words, context, or markdown."
+            "You are a pharmacist. Extract all medicine names from this image. "
+            "Return ONLY a JSON list of strings. Example: [\"Dolo 650\", \"Pan 40\"]. "
+            "If no medicines are visible, return []. "
+            "Do not use markdown."
         )
         
         response = model.generate_content([prompt, img])
-        raw_text = response.text
-        print(f"✅ AI Raw Response: {raw_text}") # Check this in Vercel logs if it fails!
+        raw_text = response.text.strip()
+        print(f"✅ AI Raw Response: {raw_text}") 
 
-        # 3. Smart Extraction (Regex) - Finds the list even if AI chats
-        # Looks for anything between [ and ]
+        # 4. Extract List using Regex
         match = re.search(r'\[.*\]', raw_text, re.DOTALL)
-        
         if match:
-            json_str = match.group()
-            return json.loads(json_str)
+            return json.loads(match.group())
         else:
-            print("⚠️ Could not find JSON list in AI response.")
             return []
 
     except Exception as e:
