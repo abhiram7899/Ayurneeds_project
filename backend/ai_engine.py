@@ -15,27 +15,26 @@ else:
 
 def analyze_prescription(image_bytes):
     try:
-        print("🔍 AI Engine: Received image data in memory")
-        
-        # 2. Open image directly from memory (No file path needed)
+        print("🔍 AI Engine: Starting analysis...")
         image_stream = io.BytesIO(image_bytes)
         img = PIL.Image.open(image_stream)
         
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # 2. Try 'gemini-1.5-flash' first (Fastest/Newest)
+        model_name = 'gemini-1.5-flash'
         
-        # 3. Strong Prompt
-        prompt = (
-            "You are a pharmacist. Extract all medicine names from this image. "
-            "Return ONLY a JSON list of strings. Example: [\"Dolo 650\", \"Pan 40\"]. "
-            "If no medicines are visible, return []. "
-            "Do not use markdown."
-        )
-        
-        response = model.generate_content([prompt, img])
+        try:
+            model = genai.GenerativeModel(model_name)
+            response = generate_response(model, img)
+        except Exception as e:
+            print(f"⚠️ {model_name} failed ({e}). Switching to 'gemini-1.5-flash-latest'...")
+            # Fallback 1
+            model = genai.GenerativeModel('gemini-1.5-flash-latest')
+            response = generate_response(model, img)
+
         raw_text = response.text.strip()
         print(f"✅ AI Raw Response: {raw_text}") 
 
-        # 4. Extract List using Regex
+        # 3. Clean and Extract JSON
         match = re.search(r'\[.*\]', raw_text, re.DOTALL)
         if match:
             return json.loads(match.group())
@@ -45,3 +44,11 @@ def analyze_prescription(image_bytes):
     except Exception as e:
         print(f"❌ AI CRASH: {e}")
         return []
+
+def generate_response(model, img):
+    prompt = (
+        "You are a pharmacist. Extract all medicine names from this image. "
+        "Return ONLY a JSON list of strings. Example: [\"Dolo 650\", \"Pan 40\"]. "
+        "Do not use markdown."
+    )
+    return model.generate_content([prompt, img])
