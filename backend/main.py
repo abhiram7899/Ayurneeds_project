@@ -29,7 +29,7 @@ TELEGRAM_BOT_TOKEN = "8593706542:AAG_EsJxPZiqLQddiMgAlhSinxtaJO-hswI"
 TELEGRAM_CHAT_ID = "6293824721"
 
 # 🔴 LIVE SERVER URLS
-RENDER_BACKEND_URL = "https://ayurneeds-project.vercel.app/"
+RENDER_BACKEND_URL = "https://ayurneeds-project.vercel.app"
 LIVE_WEBSITE_URL = "https://www.ayurneeds.com"
 
 UPLOAD_DIR = "../uploads"
