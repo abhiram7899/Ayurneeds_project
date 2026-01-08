@@ -1,65 +1,68 @@
 import os
-import google.generativeai as genai
 import json
-import PIL.Image
-import io
-import re
+import requests
+import base64
 
-# 1. Configure API Key
+# 1. Get API Key
 API_KEY = os.getenv("GOOGLE_API_KEY")
 
-if not API_KEY:
-    print("❌ ERROR: GOOGLE_API_KEY is missing!")
-else:
-    genai.configure(api_key=API_KEY)
-
 def analyze_prescription(image_bytes):
+    if not API_KEY:
+        print("❌ CRITICAL: No API Key found.")
+        return []
+
     try:
-        print("🔍 AI Engine: Starting analysis...")
-        image_stream = io.BytesIO(image_bytes)
-        img = PIL.Image.open(image_stream)
-        
-        # 2. Try models in order: Flash -> Pro (Backup)
-        # 'gemini-pro' is the stable model that works on older libraries
-        models_to_try = ['gemini-1.5-flash', 'gemini-pro']
-        
-        response = None
-        used_model = ""
+        print("🔍 AI Engine: Sending Direct HTTP Request to Google...")
 
-        for model_name in models_to_try:
-            try:
-                print(f"👉 Attempting with model: {model_name}...")
-                model = genai.GenerativeModel(model_name)
-                response = generate_response(model, img)
-                used_model = model_name
-                print(f"✅ Success with {model_name}!")
-                break # Stop loop if it works
-            except Exception as e:
-                print(f"⚠️ {model_name} failed. Error: {e}")
-                continue # Try next model
+        # 2. Convert image bytes to Base64 (Required for HTTP)
+        # This turns the image into a text string the internet can handle
+        image_b64 = base64.b64encode(image_bytes).decode('utf-8')
 
-        if not response:
-            print("❌ All AI models failed.")
+        # 3. Direct URL to Google (Bypassing the Python Library)
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+        
+        headers = {'Content-Type': 'application/json'}
+        
+        # 4. Construct the Payload
+        payload = {
+            "contents": [{
+                "parts": [
+                    {"text": "You are a pharmacist. Extract all medicine names from this image. Return ONLY a JSON list of strings. Example: [\"Dolo 650\", \"Pan 40\"]. Do not use markdown."},
+                    {
+                        "inline_data": {
+                            "mime_type": "image/jpeg",
+                            "data": image_b64
+                        }
+                    }
+                ]
+            }]
+        }
+
+        # 5. Send the Request
+        response = requests.post(url, headers=headers, json=payload)
+        
+        # 6. Check for Errors
+        if response.status_code != 200:
+            print(f"❌ Google API Error: {response.text}")
             return []
 
-        raw_text = response.text.strip()
-        print(f"✅ AI Raw Response: {raw_text}") 
-
-        # 3. Clean and Extract JSON
-        match = re.search(r'\[.*\]', raw_text, re.DOTALL)
-        if match:
-            return json.loads(match.group())
-        else:
+        # 7. Parse Response
+        result = response.json()
+        try:
+            raw_text = result['candidates'][0]['content']['parts'][0]['text']
+            print(f"✅ AI Raw Response: {raw_text}")
+            
+            # Extract JSON list
+            import re
+            match = re.search(r'\[.*\]', raw_text, re.DOTALL)
+            if match:
+                return json.loads(match.group())
+            else:
+                return []
+        except KeyError:
+            print("⚠️ AI Response format was unexpected.")
             return []
 
     except Exception as e:
-        print(f"❌ AI CRASH: {e}")
+        print(f"❌ Server Crash: {e}")
         return []
-
-def generate_response(model, img):
-    prompt = (
-        "You are a pharmacist. Extract all medicine names from this image. "
-        "Return ONLY a JSON list of strings. Example: [\"Dolo 650\", \"Pan 40\"]. "
-        "Do not use markdown."
-    )
-    return model.generate_content([prompt, img])
