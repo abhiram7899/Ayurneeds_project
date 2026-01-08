@@ -533,3 +533,31 @@ def store_checkout(order: OrderConfirm, db: Session = Depends(get_db)):
     send_telegram_alert(msg)
 
     return {"status": "pending_verification", "order_id": new_order.id}
+# ==========================================
+# 🐞 DEBUGGING TOOL
+# ==========================================
+@app.get("/debug-ai")
+def debug_ai_models():
+    import google.generativeai as genai
+    import os
+    
+    key = os.getenv("GOOGLE_API_KEY")
+    if not key:
+        return {"status": "error", "message": "API Key not found in env"}
+    
+    # Configure with the key
+    genai.configure(api_key=key)
+    
+    available_models = []
+    try:
+        # Ask Google: "What models do you have?"
+        for m in genai.list_models():
+            available_models.append(m.name)
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+        
+    return {
+        "status": "success", 
+        "my_library_version": genai.__version__,
+        "available_models": available_models
+    }
