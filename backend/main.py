@@ -32,8 +32,11 @@ TELEGRAM_CHAT_ID = "6293824721"
 RENDER_BACKEND_URL = "https://ayurneeds-project.vercel.app"
 LIVE_WEBSITE_URL = "https://www.ayurneeds.com"
 
-UPLOAD_DIR = "../uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# ✅ Vercel Fix: Use the temporary directory
+import tempfile
+
+UPLOAD_DIR = tempfile.gettempdir()
+# No need to makedirs, /tmp always exists
 
 # ==========================================
 # 🗄️ DATABASE SETUP
