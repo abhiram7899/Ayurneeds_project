@@ -19,17 +19,28 @@ def analyze_prescription(image_bytes):
         image_stream = io.BytesIO(image_bytes)
         img = PIL.Image.open(image_stream)
         
-        # 2. Try 'gemini-1.5-flash' first (Fastest/Newest)
-        model_name = 'gemini-1.5-flash'
+        # 2. Try models in order: Flash -> Pro (Backup)
+        # 'gemini-pro' is the stable model that works on older libraries
+        models_to_try = ['gemini-1.5-flash', 'gemini-pro']
         
-        try:
-            model = genai.GenerativeModel(model_name)
-            response = generate_response(model, img)
-        except Exception as e:
-            print(f"⚠️ {model_name} failed ({e}). Switching to 'gemini-1.5-flash-latest'...")
-            # Fallback 1
-            model = genai.GenerativeModel('gemini-1.5-flash-latest')
-            response = generate_response(model, img)
+        response = None
+        used_model = ""
+
+        for model_name in models_to_try:
+            try:
+                print(f"👉 Attempting with model: {model_name}...")
+                model = genai.GenerativeModel(model_name)
+                response = generate_response(model, img)
+                used_model = model_name
+                print(f"✅ Success with {model_name}!")
+                break # Stop loop if it works
+            except Exception as e:
+                print(f"⚠️ {model_name} failed. Error: {e}")
+                continue # Try next model
+
+        if not response:
+            print("❌ All AI models failed.")
+            return []
 
         raw_text = response.text.strip()
         print(f"✅ AI Raw Response: {raw_text}") 
