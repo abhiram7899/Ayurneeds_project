@@ -21,7 +21,8 @@ import ai_engine
 # ⚙️ CONFIGURATION
 # ==========================================
 # 🔴 DATABASE
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:Ayurneeds2026Project@db.peutakneeduffikaovvz.supabase.co:5432/postgres"
+# ✅ Change Port 5432 -> 6543
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:Ayurneeds2026Project@db.peutakneeduffikaovvz.supabase.co:6543/postgres"
 
 # 🔴 TELEGRAM KEYS
 TELEGRAM_BOT_TOKEN = "8593706542:AAG_EsJxPZiqLQddiMgAlhSinxtaJO-hswI"
