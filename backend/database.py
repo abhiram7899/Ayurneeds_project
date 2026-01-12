@@ -1,17 +1,22 @@
+# database.py
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
+from dotenv import load_dotenv
 
-# --- THE FIX: Force the database to stay in the 'backend' folder ---
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "ayurneeds.db")
+# Load secrets from .env file
+load_dotenv()
 
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
+# Get the URL from .env (Security Fix)
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+if not SQLALCHEMY_DATABASE_URL:
+    raise ValueError("❌ DATABASE_URL is missing from .env file!")
+
+# Create the Engine
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

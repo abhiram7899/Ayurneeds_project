@@ -1,9 +1,8 @@
 from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session, relationship
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
+from sqlalchemy.orm import Session, relationship
 from typing import List, Optional
 from pydantic import BaseModel
 import datetime
@@ -12,31 +11,30 @@ import json
 import requests
 import uuid
 from thefuzz import process 
+from dotenv import load_dotenv
 
-# IMPORT YOUR AI ENGINE
+# IMPORT YOUR LOCAL MODULES
 import ai_engine
+from database import engine, SessionLocal, Base, get_db
 
 # ==========================================
-# ⚙️ CONFIGURATION
+# ⚙️ CONFIGURATION (SECURE)
 # ==========================================
-# 🔴 DATABASE
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres.peutakneeduffikaovvz:Ayurneeds2026Project@aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require"
-# 🔴 TELEGRAM KEYS
-TELEGRAM_BOT_TOKEN = "8593706542:AAG_EsJxPZiqLQddiMgAlhSinxtaJO-hswI"
-TELEGRAM_CHAT_ID = "6293824721"
+# Load the secrets from the .env file
+load_dotenv()
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 # 🔴 LIVE SERVER URLS
 RENDER_BACKEND_URL = "https://ayurneeds-project.vercel.app"
 LIVE_WEBSITE_URL = "https://ayurneeds-frontend.vercel.app"
 
 # ==========================================
-# 🗄️ DATABASE SETUP
+# 🗄️ DATABASE MODELS
 # ==========================================
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+# We define the tables here so 'Base' knows about them for creation.
 
-# --- 1. Doctor Model ---
 class Doctor(Base):
     __tablename__ = "doctors"
     id = Column(Integer, primary_key=True, index=True)
@@ -45,7 +43,6 @@ class Doctor(Base):
     phone = Column(String, nullable=True)
     clinic_address = Column(String, nullable=True)
 
-# --- 2. Prescription Model ---
 class Prescription(Base):
     __tablename__ = "prescriptions"
     id = Column(Integer, primary_key=True, index=True)
@@ -64,7 +61,6 @@ class Prescription(Base):
 
     doctor = relationship("Doctor")
 
-# --- 3. Pharmacy Inventory Models ---
 class Pharmacy(Base):
     __tablename__ = "pharmacies"
     id = Column(Integer, primary_key=True, index=True)
@@ -94,18 +90,11 @@ class CompletedOrder(Base):
     transaction_id = Column(String)
     order_date = Column(DateTime, default=datetime.datetime.utcnow)
 
-# Create all tables
+# Create all tables in the Database (if they don't exist)
 Base.metadata.create_all(bind=engine)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 # ==========================================
-# 🚀 FASTAPI APP
+# 🚀 FASTAPI APP SETUP
 # ==========================================
 app = FastAPI()
 
@@ -117,7 +106,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Input Models ---
+# --- Input Models (Pydantic) ---
 class DoctorCreate(BaseModel):
     name: str
     phone: str
@@ -143,11 +132,15 @@ class ContactForm(BaseModel):
 
 # --- Helper: Telegram Alert ---
 def send_telegram_alert(message):
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        print("⚠️ Telegram keys missing in .env")
+        return
+
     try:
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": message})
-    except:
-        pass
+    except Exception as e:
+        print(f"Telegram Error: {e}")
 
 # --- Helper: Real Stock Check ---
 def check_real_stock(medicines, db: Session):
@@ -169,12 +162,12 @@ def check_real_stock(medicines, db: Session):
     return "\n".join(report)
 
 # ==========================================
-# 📡 ENDPOINTS
+# 📡 API ENDPOINTS
 # ==========================================
 
 @app.get("/")
 def home():
-    return {"message": "Ayurneeds Backend Running Live"}
+    return {"message": "Ayurneeds Backend Running Live (Secured)"}
 
 # 1. REGISTER DOCTOR
 @app.post("/register-doctor/")
@@ -191,7 +184,7 @@ def register_doctor(doctor: DoctorCreate, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "success", "unique_uuid": new_uuid}
 
-# 2. DOCTOR UPLOAD (UPDATED FOR IN-MEMORY PROCESSING)
+# 2. DOCTOR UPLOAD (Memory Processing)
 @app.post("/upload-prescription/{doctor_uuid}")
 async def upload_prescription(
     doctor_uuid: str, file: UploadFile = File(None), 
@@ -207,9 +200,9 @@ async def upload_prescription(
     if file:
         filename = file.filename
         try:
-            # ✅ READ FILE INTO MEMORY (No saving to disk)
+            # ✅ Read file into memory (No saving to disk)
             contents = await file.read()
-            # ✅ SEND RAW BYTES TO AI ENGINE
+            # ✅ Send raw bytes to AI Engine
             ai_results = ai_engine.analyze_prescription(contents)
         except Exception as e:
             print(f"Upload Error: {e}")
@@ -245,7 +238,7 @@ async def upload_prescription(
     send_telegram_alert(msg1)
 
     stock_report = check_real_stock(final_list, db)
-    # ✅ LINK TO RENDER BACKEND
+    # Link to Admin Dashboard (Render Backend)
     confirm_link = f"{RENDER_BACKEND_URL}/admin/approve/{new_pres.id}"
     
     msg2 = f"🏪 *Pharmacy Stock Report*\n\n{stock_report}\n\n👇 *ACTION REQUIRED*\nClick to Confirm & Notify Patient:\n{confirm_link}"
@@ -262,7 +255,7 @@ def approve_prescription(pres_id: int, db: Session = Depends(get_db)):
     pres.status = "Approved"
     db.commit()
 
-    # ✅ LINK TO LIVE WEBSITE
+    # Link to Frontend Patient Login
     patient_link = f"{LIVE_WEBSITE_URL}/patient_login.html?id={pres.id}"
     
     phone = pres.patient_phone.replace(" ", "").replace("-", "")
@@ -331,6 +324,7 @@ def get_data(pres_id: int, db: Session = Depends(get_db)):
         written_name = med.get('name')
         try:
             raw_qty = str(med.get('qty', '1'))
+            # Simple digit extraction
             qty_number = int(''.join(filter(str.isdigit, raw_qty)))
             if qty_number == 0: qty_number = 1
         except:
@@ -385,7 +379,7 @@ def confirm_order(pres_id: int, order: OrderConfirm, db: Session = Depends(get_d
     pres.status = "Verifying Payment"
     db.commit()
 
-    # ✅ LINK TO RENDER
+    # Link to Backend Payment Action
     approve_link = f"{RENDER_BACKEND_URL}/admin/payment-action/{pres_id}/approve"
     decline_link = f"{RENDER_BACKEND_URL}/admin/payment-action/{pres_id}/decline"
 
@@ -512,7 +506,7 @@ def store_checkout(order: OrderConfirm, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_order)
 
-    # ✅ LINK TO RENDER
+    # Link to Backend Payment Action
     approve_link = f"{RENDER_BACKEND_URL}/admin/payment-action/{new_order.id}/approve"
     decline_link = f"{RENDER_BACKEND_URL}/admin/payment-action/{new_order.id}/decline"
 
@@ -533,17 +527,17 @@ def store_checkout(order: OrderConfirm, db: Session = Depends(get_db)):
     send_telegram_alert(msg)
 
     return {"status": "pending_verification", "order_id": new_order.id}
+
 # ==========================================
-# 🐞 DEBUGGING TOOL
+# 🐞 DEBUGGING TOOL (SECURE)
 # ==========================================
 @app.get("/debug-ai")
 def debug_ai_models():
     import google.generativeai as genai
-    import os
     
     key = os.getenv("GOOGLE_API_KEY")
     if not key:
-        return {"status": "error", "message": "API Key not found in env"}
+        return {"status": "error", "message": "API Key not found in .env"}
     
     # Configure with the key
     genai.configure(api_key=key)
