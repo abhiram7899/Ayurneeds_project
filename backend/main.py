@@ -28,7 +28,7 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 # 🔴 LIVE SERVER URLS
 RENDER_BACKEND_URL = "https://ayurneeds-project.vercel.app"
-LIVE_WEBSITE_URL = "https://ayurneeds-frontend.vercel.app"
+LIVE_WEBSITE_URL = "https://ayurneeds.com"
 
 # ==========================================
 # 🗄️ DATABASE MODELS
