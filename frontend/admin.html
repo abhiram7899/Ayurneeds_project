@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel | Ayurneeds</title>
-    <link rel="stylesheet" href="nav.css">
+    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* GLOBAL SETTINGS */
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
@@ -43,8 +44,9 @@
         <div class="nav-links">
             <a href="index.html" class="nav-btn">Home</a>
             <a href="contact.html" class="nav-btn">Contact</a>
+             <a href="about.html" class="nav-btn">About</a>
             <a href="store.html" class="nav-btn">Store</a>
-            <a href="about.html" class="nav-btn">About</a>
+           <a href="track.html" class="nav-btn">Track Order</a>
             <a href="admin.html" class="nav-btn nav-primary">Admin Login</a>
         </div>
     </header>
@@ -97,7 +99,7 @@
 
     <script>
         // ✅ Live Render Backend URL
-        const API_URL = "https://ayurneeds-project.vercel.app";
+        const API_URL = "https://ayurneeds.com";
 
         window.onload = function() {
             if (sessionStorage.getItem("admin_access") === "true") {

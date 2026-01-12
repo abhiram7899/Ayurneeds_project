@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Store | Ayurneeds</title>
-    <link rel="stylesheet" href="nav.css">
+    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; }
         
@@ -51,7 +52,7 @@
             <a href="contact.html" class="nav-btn">Contact</a>
             <a href="about.html" class="nav-btn">About</a>
             <a href="store.html" class="nav-btn nav-primary">Store</a>
-            <a href="admin.html" class="nav-btn">Admin Login</a>
+            <a href="track.html" class="nav-btn">Track Order</a>
         </div>
     </header>
 
@@ -76,7 +77,7 @@
 
     <script>
         // ✅ Live Render Backend URL
-        const API_URL = "https://ayurneeds-project.vercel.app";
+        const API_URL = "https://ayurneeds.com";
 
         let cart = JSON.parse(localStorage.getItem('ayurCart')) || [];
         let allProducts = []; 

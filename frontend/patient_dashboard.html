@@ -4,27 +4,60 @@
     <meta charset="UTF-8">
     <title>My Prescription Order | Ayurneeds</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="nav.css">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; color: #2c3e50; }
+        /* DASHBOARD SPECIFIC STYLES */
         .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 600px; }
-        th { background: #f8f9fa; color: #555; padding: 12px; text-align: left; border-bottom: 2px solid #ddd; }
-        td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
-        .qty-controls { display: flex; align-items: center; gap: 8px; }
-        .qty-btn { background: #e2e6ea; border: 1px solid #ced4da; color: #333; width: 30px; height: 30px; border-radius: 5px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .qty-val { font-weight: bold; width: 25px; text-align: center; }
-        .cancel-btn { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+        
+        /* --- 🛠️ UPDATED QUANTITY CONTROLS (Compact) --- */
+        .qty-controls { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 2px; /* Very tight gap */
+        }
+        
+        .qty-btn { 
+            background: transparent !important; /* No background box */
+            border: none !important; 
+            color: #2c3e50; 
+            font-size: 1.5rem; /* Larger symbol */
+            font-weight: 800; 
+            cursor: pointer; 
+            padding: 0 8px;
+            line-height: 1;
+            width: auto !important; /* Auto width */
+            box-shadow: none !important; /* Remove any button shadow */
+        }
+
+        .qty-btn:hover { 
+            color: #27ae60; 
+            transform: scale(1.2); 
+            background: transparent;
+        }
+
+        .qty-val { 
+            font-weight: 600; 
+            font-size: 1rem;
+            min-width: 20px; 
+            text-align: center; 
+        }
+
+        /* Red Remove "x" icon style if you want, but keeping "Remove" button for clarity */
+        .cancel-btn { 
+            background: #ffebee; color: #c62828; 
+            border: 1px solid #ffcdd2; padding: 5px 10px; 
+            border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; 
+        }
+
         .total-row { font-weight: bold; font-size: 1.2em; background: #e8f5e9; color: #2e7d32; }
-        label { display: block; margin: 15px 0 5px; font-weight: 600; color: #555; }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .action-btn { width: 100%; padding: 15px; margin-top: 20px; background: #27ae60; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .action-btn:hover { background: #219150; }
+        
+        /* Layout adjustments */
+        #verifyOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; text-align:center; padding-top:100px; }
         #upiSection { display: block; background: #fff; padding: 25px; border-radius: 10px; text-align: center; border: 2px dashed #27ae60; margin-top: 30px; }
-        .pay-link-btn { display: inline-block; background: #25D366; color: white; text-decoration: none; padding: 15px 30px; border-radius: 30px; font-size: 18px; font-weight: bold; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); transition: 0.3s; }
-        .pay-link-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6); }
         .txn-input { width: 100%; padding: 12px; border: 2px solid #27ae60; border-radius: 8px; font-size: 16px; text-align: center; letter-spacing: 1px; margin-top: 10px; }
     </style>
 </head>
@@ -34,15 +67,16 @@
         <a href="index.html" class="logo">
         <img src="images/logo.png" alt="Ayurneeds Logo"></a>
         <div class="nav-links">
-            <a href="index.html" class="nav-btn">Home</a>
-            <a href="store.html" class="nav-btn">Store</a>
-            <a href="about.html" class="nav-btn">About</a>
+            <a href="index.html" class="nav-btn nav-primary">Home</a>
             <a href="contact.html" class="nav-btn">Contact</a>
-            <a href="admin.html" class="nav-btn nav-primary">Admin Login</a>
+            <a href="about.html" class="nav-btn">About</a>
+            <a href="store.html" class="nav-btn">Store</a>
+            <a href="track.html" class="nav-btn">Track Order</a>
+           
         </div>
     </header>
 
-    <div id="verifyOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; text-align:center; padding-top:100px;">
+    <div id="verifyOverlay">
         <div style="font-size: 60px;">⏳</div>
         <h2 style="color:#2c3e50;">Verifying Payment...</h2>
         <p style="font-size:18px; color:#555;">Please wait while the admin verifies your transaction.</p>
@@ -61,7 +95,7 @@
                     <tr>
                         <th style="width: 30%;">Medicine</th>
                         <th style="width: 15%;">Price</th>
-                        <th style="width: 25%;">Quantity</th>
+                        <th style="width: 20%; text-align:center;">Quantity</th>
                         <th style="width: 15%;">Total</th>
                         <th style="width: 15%;">Action</th>
                     </tr>
@@ -81,39 +115,39 @@
             <label>Full Name</label>
             <input type="text" id="pName" required placeholder="Receiver's Name">
             
+            <label>Contact Number</label>
+            <input type="tel" id="pPhone" required placeholder="10-digit Mobile Number" maxlength="10">
+            <small id="phoneError" style="color:red; display:none;">❌ Invalid Phone Number</small>
+            
             <label>Full Address</label>
-            <input type="text" id="pAddress" required placeholder="Flat No, Street, Area, City">
+            <input type="text" id="pAddress" required placeholder="House No, Street, Area (Min 15 chars)">
+            <small id="addressError" style="color:red; display:none;">❌ Address too short</small>
 
             <label>Pincode</label>
-            <input type="number" id="pPincode" required placeholder="577201">
+            <input type="number" id="pPincode" required placeholder="6-digit Pincode" maxlength="6">
+            <small id="pincodeError" style="color:red; display:none;">❌ Invalid Pincode</small>
 
             <div id="upiSection">
-                <p style="font-weight:bold; color:#2c3e50; margin-bottom: 15px;">
-                    Step 1: Click button to Pay ₹<span id="displayAmount">0</span>
-                </p>
+                <h3 style="color:#27ae60;"><i class="fas fa-qrcode"></i> Scan to Pay</h3>
+                <div id="qrcode" style="display:flex; justify-content:center; margin: 20px auto;"></div>
+                <p style="font-weight:bold; color:#2c3e50;">Amount: ₹<span id="displayAmount">0</span></p>
+                <a id="payBtn" href="#" class="pay-link-btn" style="margin-bottom: 15px;"><i class="fas fa-mobile-alt"></i> Open UPI App</a>
                 
-                <a id="payBtn" href="#" class="pay-link-btn">
-                    🚀 Pay with UPI App
-                </a>
-                
-                <p style="font-size:13px; color:#666; margin-bottom: 5px;">
-                    Step 2: After payment, enter Transaction ID (UTR):
-                </p>
-                
-                <input type="text" id="txnId" class="txn-input" required placeholder="Enter Transaction ID">
+                <p style="font-size:13px; color:#666; margin-top:15px;">Step 2: Enter 12-digit Transaction ID (UTR):</p>
+                <input type="text" id="txnId" class="txn-input" required placeholder="e.g. 321456879012" maxlength="18">
+                <small id="txnError" style="color:red; display:none;">❌ Invalid Transaction ID (Min 12 chars)</small>
             </div>
 
             <button type="submit" class="action-btn">✅ Confirm Order</button>
         </form>
     </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     // 🔴 CONFIGURATION
     const SHOP_UPI_ID = "9988776655@okaxis"; 
     const SHOP_NAME = "Ayurneeds Pharmacy";
-    
-    // ✅ Live Render Backend URL
-    const API_URL = "https://ayurneeds-project.vercel.app"; 
+    const API_URL = "https://ayurneeds.com"; 
     
     const presId = new URLSearchParams(window.location.search).get('id');
     let currentMedicines = []; 
@@ -126,7 +160,6 @@
             
             const data = await res.json();
             document.getElementById('docName').innerText = data.doctor;
-            
             currentMedicines = data.medicines;
             renderTable();
         } catch(e) {
@@ -151,7 +184,7 @@
             tr.innerHTML = `
                 <td>${nameDisplay}</td>
                 <td>₹${med.price}</td>
-                <td>
+                <td style="text-align:center;">
                     <div class="qty-controls">
                         <button type="button" class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
                         <span class="qty-val">${med.qty}</span>
@@ -170,6 +203,8 @@
     }
 
     function updatePayLink(amount) {
+        const qrContainer = document.getElementById('qrcode');
+        qrContainer.innerHTML = ""; 
         if (amount <= 0) {
             document.getElementById('payBtn').style.display = 'none';
             return;
@@ -177,6 +212,13 @@
         document.getElementById('payBtn').style.display = 'inline-block';
         const upiLink = `upi://pay?pa=${SHOP_UPI_ID}&pn=${SHOP_NAME}&am=${amount}&cu=INR`;
         document.getElementById('payBtn').href = upiLink;
+        
+        new QRCode(qrContainer, {
+            text: upiLink,
+            width: 150,
+            height: 150,
+            correctLevel : QRCode.CorrectLevel.H
+        });
     }
 
     function updateQty(index, change) {
@@ -193,26 +235,44 @@
         }
     }
 
-    // ✅ SECURE ORDER LOGIC
     async function placeOrder(e) {
         e.preventDefault();
         
-        if(currentMedicines.length === 0) return alert("Cart is empty!");
-        
+        const phone = document.getElementById('pPhone').value;
+        const address = document.getElementById('pAddress').value;
+        const pincode = document.getElementById('pPincode').value;
         const txnId = document.getElementById('txnId').value;
-        if (!txnId || txnId.length < 5) return alert("Please enter a valid Transaction ID.");
+        let isValid = true;
+
+        const phoneRegex = /^[6-9]\d{9}$/;
+        if (!phoneRegex.test(phone)) { document.getElementById('phoneError').style.display = 'block'; isValid = false; } 
+        else { document.getElementById('phoneError').style.display = 'none'; }
+
+        if (address.length < 15) { document.getElementById('addressError').style.display = 'block'; isValid = false; } 
+        else { document.getElementById('addressError').style.display = 'none'; }
+
+        const pinRegex = /^[1-9][0-9]{5}$/;
+        if (!pinRegex.test(pincode)) { document.getElementById('pincodeError').style.display = 'block'; isValid = false; } 
+        else { document.getElementById('pincodeError').style.display = 'none'; }
+
+        if (txnId.length < 12) { document.getElementById('txnError').style.display = 'block'; isValid = false; } 
+        else { document.getElementById('txnError').style.display = 'none'; }
+
+        if (!isValid) return alert("⚠️ Please fix the errors highlighted in red.");
+        if(currentMedicines.length === 0) return alert("Cart is empty!");
 
         const payload = {
             patient_name: document.getElementById('pName').value,
-            address_line: document.getElementById('pAddress').value,
+            phone: phone,
+            address_line: address,
             landmark: "NA",
-            pincode: document.getElementById('pPincode').value,
+            pincode: pincode,
             payment_mode: `UPI (Txn: ${txnId})`, 
             final_medicines: currentMedicines 
         };
 
         const btn = document.querySelector('.action-btn');
-        btn.innerText = "Processing...";
+        btn.innerText = "Verifying...";
         btn.disabled = true;
 
         try {
@@ -232,7 +292,6 @@
         }
     }
 
-    // 🔄 POLLING FUNCTION
     function startPollingStatus() {
         const intervalId = setInterval(async () => {
             try {
@@ -246,18 +305,25 @@
                     clearInterval(intervalId);
                     showFailureScreen();
                 }
-            } catch(e) { console.log("Polling..."); }
+            } catch(e) {}
         }, 3000); 
     }
 
     function showSuccessScreen() {
+        // presId is already defined at the top of your script
         document.body.innerHTML = `
             <div style="text-align:center; padding:80px 20px; font-family:sans-serif;">
                 <div style="font-size:80px;">🎉</div>
                 <h1 style="color:#27ae60;">Order Confirmed!</h1>
                 <p>The admin has verified your payment.</p>
-                <p>Order Total: ₹${document.getElementById('grandTotal').innerText}</p>
-                <a href="index.html" class="pay-link-btn" style="background:#2c3e50; font-size:16px;">Back to Home</a>
+                
+                <div style="background:#f0f2f5; padding:20px; border-radius:15px; margin:20px auto; max-width:400px;">
+                    <p style="margin:0; color:#555; font-size:14px;">YOUR TRACKING ID</p>
+                    <h2 style="margin:5px 0; color:#333; font-size:40px;">#${presId}</h2>
+                    <p style="font-size:12px; color:#888;">Save this ID to track your delivery.</p>
+                </div>
+
+                <a href="track.html" class="pay-link-btn" style="background:#2c3e50; font-size:16px;">Track Order Now</a>
             </div>
         `;
     }

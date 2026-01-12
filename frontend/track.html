@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Order | Ayurneeds</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* Tracking Specific Styles */
+        .track-input {
+            font-size: 1.2rem;
+            text-align: center;
+            letter-spacing: 2px;
+            border: 2px solid #ddd;
+        }
+        .track-input:focus { border-color: #27ae60; }
+
+        .status-box {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.6);
+            display: none; /* Hidden by default */
+        }
+
+        .status-icon { font-size: 50px; margin-bottom: 10px; display: block; }
+        
+        .status-step {
+            display: flex; align-items: center; margin-bottom: 15px; opacity: 0.5;
+        }
+        .status-step.active { opacity: 1; font-weight: bold; color: #27ae60; }
+        .step-dot {
+            width: 15px; height: 15px; background: #ccc; border-radius: 50%; margin-right: 15px;
+        }
+        .status-step.active .step-dot { background: #27ae60; box-shadow: 0 0 10px #27ae60; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">
+            <img src="images/logo.png" alt="Ayurneeds Logo">
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn">Home</a>
+            <a href="contact.html" class="nav-btn">Contact</a>
+            <a href="about.html" class="nav-btn">About</a>
+            <a href="store.html" class="nav-btn">Store</a>
+            <a href="track.html" class="nav-btn nav-primary">Track Order</a>
+        </div>
+    </header>
+
+    <div class="container" style="max-width: 600px; text-align: center;">
+        <h1>📦 Track Your Order</h1>
+        <p>Enter your Order ID received on WhatsApp or SMS.</p>
+
+        <input type="text" id="orderId" class="track-input" placeholder="Enter Order ID (e.g., 105)">
+        <button onclick="trackOrder()" class="action-btn">🔍 Check Status</button>
+
+        <div id="resultArea" class="status-box">
+            <div id="mainIcon" class="status-icon">🔄</div>
+            <h2 id="mainStatus" style="color: #2c3e50;">Loading...</h2>
+            
+            <hr style="border:0; border-top:1px solid #ddd; margin: 20px 0;">
+
+            <div class="status-step" id="step1">
+                <div class="step-dot"></div> Order Received
+            </div>
+            <div class="status-step" id="step2">
+                <div class="step-dot"></div> Payment Verified
+            </div>
+            <div class="status-step" id="step3">
+                <div class="step-dot"></div> Out for Delivery
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://ayurneeds.com"; 
+
+        async function trackOrder() {
+            const id = document.getElementById('orderId').value;
+            if(!id) return alert("Please enter an Order ID");
+
+            const btn = document.querySelector('.action-btn');
+            const resultBox = document.getElementById('resultArea');
+            
+            btn.innerText = "Searching...";
+            btn.disabled = true;
+            resultBox.style.display = 'none';
+
+            try {
+                // Call your existing backend API
+                const res = await fetch(`${API_URL}/check-order-status/${id}`);
+                const data = await res.json();
+
+                if(data.status === "error") {
+                    alert("❌ Order ID not found!");
+                } else {
+                    displayStatus(data.status);
+                }
+            } catch(e) {
+                alert("Network Error. Please try again.");
+            }
+
+            btn.innerText = "🔍 Check Status";
+            btn.disabled = false;
+        }
+
+        function displayStatus(status) {
+            const box = document.getElementById('resultArea');
+            const mainText = document.getElementById('mainStatus');
+            const icon = document.getElementById('mainIcon');
+            
+            // Reset steps
+            document.getElementById('step1').className = "status-step";
+            document.getElementById('step2').className = "status-step";
+            document.getElementById('step3').className = "status-step";
+
+            box.style.display = 'block';
+            mainText.innerText = status;
+
+            // Logic to update the UI based on status
+            if(status === "Pending Approval" || status === "Pending") {
+                icon.innerText = "⏳";
+                document.getElementById('step1').classList.add('active');
+            } 
+            else if(status === "Approved" || status === "Verifying Payment") {
+                icon.innerText = "💳";
+                document.getElementById('step1').classList.add('active');
+            } 
+            else if(status === "Ordered" || status === "Completed") {
+                icon.innerText = "✅";
+                mainText.innerText = "Order Confirmed & Placed";
+                document.getElementById('step1').classList.add('active');
+                document.getElementById('step2').classList.add('active');
+                document.getElementById('step3').classList.add('active');
+            } 
+            else if(status === "Payment Failed") {
+                icon.innerText = "❌";
+                mainText.style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>

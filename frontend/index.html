@@ -4,18 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ayurneeds | Future of Pharmacy</title>
-    <link rel="stylesheet" href="nav.css">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        /* GLOBAL RESET & FONTS */
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #333; }
-        
-        /* 1. HERO SECTION */
+        /* ✅ I REMOVED the "body { background-color... }" line here. 
+           Now style.css controls the background (Purple Gradient).
+        */
+
+        /* Specific Hero Styles just for the Home Page */
         .hero {
             position: relative;
-            /* ✅ pointing to your local image folder */
             background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(44, 62, 80, 0.9)), url('images/home-bg.jpg');
             background-position: center;
-            height: 600px; /* Tall banner */
+            height: 600px; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -23,9 +26,9 @@
             color: white;
             background-size: cover;
             padding: 20px;
-            margin-top: -20px; /* Pull up behind nav */
-            padding-top: 100px; /* Push content down */
-            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%); /* Slanted bottom edge */
+            margin-top: -20px;
+            padding-top: 100px;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
         }
 
         .hero-content h1 {
@@ -59,10 +62,10 @@
         }
         .hero-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); background: #f1f1f1; }
 
-        /* 2. FLOATING FEATURES CARDS */
+        /* Feature Cards Grid */
         .features-container {
             max-width: 1100px;
-            margin: -80px auto 50px; /* Overlap the hero section */
+            margin: -80px auto 50px;
             position: relative;
             z-index: 10;
             display: grid;
@@ -71,21 +74,23 @@
             padding: 0 20px;
         }
 
+        /* Using the glass effect from style.css but customizing for cards */
         .feature-card {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             padding: 40px;
             border-radius: 15px;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             transition: 0.3s;
+            backdrop-filter: blur(10px);
         }
         .feature-card:hover { transform: translateY(-10px); }
         .feature-icon { font-size: 50px; margin-bottom: 20px; display: block; }
         .feature-title { font-size: 1.5rem; font-weight: bold; color: #2c3e50; margin-bottom: 10px; }
         .feature-text { color: #666; line-height: 1.6; }
 
-        /* 3. HOW IT WORKS (Timeline) */
-        .steps-section { padding: 80px 20px; text-align: center; background: white; }
+        /* Steps Section */
+        .steps-section { padding: 80px 20px; text-align: center; background: white; border-radius: 20px; margin: 20px; }
         .section-title { font-size: 2.5rem; color: #2c3e50; margin-bottom: 60px; font-weight: bold; }
         
         .steps-grid {
@@ -105,7 +110,7 @@
             margin: 0 auto 20px; box-shadow: 0 0 0 5px rgba(39, 174, 96, 0.2);
         }
 
-        /* 4. FOOTER */
+        /* Footer */
         footer {
             background: #2c3e50; color: white; padding: 60px 20px 20px;
             text-align: center; margin-top: 50px;
@@ -114,13 +119,12 @@
         .footer-links a { color: #bdc3c7; text-decoration: none; margin: 0 10px; font-size: 14px; }
         .footer-links a:hover { color: white; }
 
-        /* Animations */
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Responsive */
+        /* Responsive Fixes */
         @media (max-width: 768px) {
             .hero-content h1 { font-size: 2.5rem; }
             .features-container { margin-top: 20px; }
@@ -132,12 +136,14 @@
 
     <header>
         <a href="index.html" class="logo">
-        <img src="images/logo.png" alt="Ayurneeds Logo"></a>
+            <img src="images/logo.png" alt="Ayurneeds Logo">
+        </a>
         <div class="nav-links">
             <a href="index.html" class="nav-btn nav-primary">Home</a>
             <a href="contact.html" class="nav-btn">Contact</a>
             <a href="about.html" class="nav-btn">About</a>
             <a href="store.html" class="nav-btn">Store</a>
+            <a href="track.html" class="nav-btn">Track Order</a>
             <a href="admin.html" class="nav-btn">Admin Login</a>
         </div>
     </header>
@@ -187,6 +193,7 @@
                 <p>Click the link, review your bill, pay via UPI, and wait for delivery!</p>
             </div>
         </div>
+        
     </section>
 
     <footer>
@@ -194,12 +201,11 @@
             <h2>Ayurneeds Pharmacy</h2>
             <p>Your trusted partner in health and technology.</p>
             <div class="footer-links">
-                <a href="store.html">Order Medicines</a>
-                <a href="contact.html">Contact Support</a>
-                <a href="about.html">About Us</a>
-                <a href="admin.html">Admin Login</a>
+               <a href="store.html">Order Medicines</a>
+               <a href="policies.html">Privacy & Policies</a> <a href="contact.html">Contact Support</a>
+               <a href="about.html">About Us</a>
+             <a href="admin.html">Admin Login</a>
             </div>
-            <p style="margin-top: 30px; font-size: 12px; color: #7f8c8d;">© 2026 Ayurneeds. All rights reserved.</p>
         </div>
     </footer>
 

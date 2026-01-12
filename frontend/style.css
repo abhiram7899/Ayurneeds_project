@@ -1,20 +1,102 @@
-/* frontend/style.css - CLEAN VERSION (ZERO WARNINGS) */
+/* frontend/style.css - FINAL MERGED VERSION */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
+/* =========================================
+   1. GLOBAL & BACKGROUND
+   ========================================= */
 body {
     font-family: 'Poppins', sans-serif;
-    /* Modern Deep Purple/Blue Gradient */
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* Modern Deep Purple/Blue Gradient Background */
+    background: linear-gradient(135deg, #ecedf1 0%, #fbfafb 100%);
     margin: 0;
     padding: 0;
     min-height: 100vh;
     color: #333;
+    padding-top: 100px; /* Space for your fixed header */
     overflow-x: hidden;
 }
 
-/* --- Glassmorphism Card Effect --- */
-.container, .order-card, .product-card {
-    background: rgba(255, 255, 255, 0.85);
+/* =========================================
+   2. YOUR HEADER (Restored exactly as you wanted)
+   ========================================= */
+header {
+    background: rgba(255, 255, 255, 0.98);
+    padding: 10px 50px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    position: fixed; 
+    width: 100%; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-sizing: border-box;
+}
+
+.logo { 
+    display: flex; 
+    align-items: center; 
+    text-decoration: none;
+}
+
+.logo img {
+    height: 50px; /* Keeps your logo image the correct size */
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover img {
+    transform: scale(1.05);
+}
+
+.nav-links {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.nav-btn {
+    text-decoration: none; 
+    color: #333; 
+    font-weight: 600; 
+    padding: 8px 15px;
+    transition: 0.3s; 
+    border-radius: 20px;
+    font-size: 16px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.nav-btn:hover { 
+    background: #f0f2f5; 
+    color: #27ae60; 
+}
+
+.nav-primary {
+    background: #27ae60; 
+    color: white !important; 
+    padding: 8px 20px;
+    box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+}
+
+.nav-primary:hover { 
+    background: #219150; 
+    transform: translateY(-2px); 
+}
+
+/* Mobile Responsive Header */
+@media (max-width: 768px) {
+    header { padding: 10px 20px; flex-direction: column; gap: 10px; }
+    .nav-links { gap: 5px; flex-wrap: wrap; justify-content: center; }
+    body { padding-top: 140px; }
+}
+
+/* =========================================
+   3. MODERN GLASS LAYOUT (For Login, Dashboard, Store)
+   ========================================= */
+/* These classes apply the frosted glass effect to your main content areas */
+.container, .login-card, .order-card, .product-card, .admin-wrapper {
+    background: rgba(255, 255, 255, 0.92); /* High readability */
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 20px;
@@ -22,50 +104,36 @@ body {
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     border: 1px solid rgba(255, 255, 255, 0.4);
     margin: 40px auto;
-    max-width: 500px;
-    text-align: center;
-    transition: transform 0.3s ease;
+    max-width: 1000px;
 }
 
-.container:hover, .product-card:hover {
-    transform: translateY(-5px);
-}
-
-h2 { color: #4a148c; font-weight: 700; letter-spacing: -0.5px; }
-h3 { color: #333; }
-p { color: #555; line-height: 1.6; }
-
-/* --- Inputs --- */
-.input-group {
-    position: relative;
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-input[type="text"], input[type="number"], input[type="file"] {
+/* =========================================
+   4. MODERN INPUTS & BUTTONS
+   ========================================= */
+input[type="text"], input[type="number"], input[type="file"], input[type="tel"], input[type="email"], textarea {
     width: 100%;
     padding: 15px;
     margin: 10px 0;
     border: 2px solid transparent;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
-    box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
     font-size: 1rem;
     transition: 0.3s;
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+    box-sizing: border-box;
 }
 
-input:focus {
+input:focus, textarea:focus {
     border-color: #764ba2;
     background: white;
     outline: none;
     box-shadow: 0 0 15px rgba(118, 75, 162, 0.2);
 }
 
-/* --- Buttons --- */
-button {
-    background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
+/* Main Action Buttons (Submit, Pay, Login) */
+button, .action-btn, .generate-btn {
+    background: linear-gradient(45deg, #27ae60 0%, #2ecc71 100%); /* Green Gradient */
     color: white;
     border: none;
     padding: 15px 30px;
@@ -74,164 +142,26 @@ button {
     cursor: pointer;
     width: 100%;
     font-weight: 600;
-    letter-spacing: 0.5px;
-    box-shadow: 0 5px 15px rgba(37, 117, 252, 0.4);
+    box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
 }
 
-button:hover {
-    transform: scale(1.02);
-    box-shadow: 0 8px 25px rgba(37, 117, 252, 0.6);
+button:hover, .action-btn:hover, .generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.6);
 }
 
-button:active {
-    transform: scale(0.98);
-}
+/* =========================================
+   5. TABLES & UTILITIES
+   ========================================= */
+table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+th { background: rgba(0,0,0,0.05); color: #333; padding: 12px; text-align: left; border-bottom: 2px solid #ddd; }
+td { padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); vertical-align: middle; }
 
-/* --- Navigation Bar --- */
-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 10%;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-}
+h2, h3 { color: #2c3e50; font-weight: 700; }
 
-.logo {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #6a11cb; /* Replaced Gradient with Solid Modern Color */
-    cursor: pointer;
-}
-
-.nav-links a {
-    margin-left: 30px;
-    text-decoration: none;
-    color: #555;
-    font-weight: 600;
-    position: relative;
-    transition: 0.3s;
-}
-
-.nav-links a:hover {
-    color: #6a11cb;
-}
-
-/* --- Status Messages --- */
-.status {
-    margin-top: 20px;
-    padding: 15px;
-    border-radius: 12px;
-    font-size: 0.95rem;
-    display: none;
-}
-.status.success {
-    display: block;
-    color: #155724;
-    background-color: #d4edda;
-    border: 1px solid #c3e6cb;
-    animation: fadeIn 0.5s;
-}
-.status.loading {
-    display: block;
-    color: #856404;
-    background-color: #fff3cd;
-    border: 1px solid #ffeeba;
-    animation: fadeIn 0.5s;
-}
-.status.error {
-    display: block;
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    animation: shake 0.4s;
-}
-
-/* --- Animations --- */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
-    100% { transform: translateX(0); }
-}
-
-/* --- Responsive Layout --- */
-@media (max-width: 600px) {
-    .hero h1 { font-size: 2.5rem; }
-    nav { padding: 1rem 5%; flex-direction: column; }
-    .nav-links { margin-top: 15px; }
-    .nav-links a { margin: 0 10px; font-size: 0.9rem; }
-}
-/* --- NEW STYLES FOR CONTACT & GALLERY --- */
-
-/* Action Buttons (WhatsApp, Call, Email) */
-.action-btn-container {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    margin-top: 20px;
-}
-
-.action-btn {
-    text-decoration: none;
-    color: white;
-    padding: 15px 25px;
-    border-radius: 50px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    transition: transform 0.3s;
-    margin: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-}
-.action-btn i { margin-right: 10px; font-size: 1.2rem; }
-.action-btn:hover { transform: translateY(-3px); }
-
-.btn-whatsapp { background: linear-gradient(45deg, #25D366, #128C7E); }
-.btn-email { background: linear-gradient(45deg, #EA4335, #C5221F); }
-.btn-call { background: linear-gradient(45deg, #3498db, #2980b9); }
-
-/* Photo Gallery */
-.gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-}
-.gallery-img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 10px;
-    transition: transform 0.3s;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-.gallery-img:hover { transform: scale(1.05); }
-
-/* Text Area for Contact Form */
-textarea {
-    width: 100%;
-    padding: 15px;
-    border: 2px solid transparent;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 12px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 1rem;
-    box-sizing: border-box;
-    margin-top: 10px;
-}
-textarea:focus { outline: none; border-color: #764ba2; background: white; }
+/* Status Messages */
+.status { padding: 15px; border-radius: 12px; margin-top: 20px; display: none; }
+.status.success { background: #d4edda; color: #155724; display: block; border: 1px solid #c3e6cb; }
+.status.error { background: #f8d7da; color: #721c24; display: block; border: 1px solid #f5c6cb; }
+.status.loading { background: #fff3cd; color: #856404; display: block; border: 1px solid #ffeeba; }

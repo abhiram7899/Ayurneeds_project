@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Policies | Ayurneeds</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* Policy Page Specific Styles */
+        .policy-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            margin: 40px auto;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 40px; }
+        h2 { color: #27ae60; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 40px; }
+        p, li { line-height: 1.8; color: #555; font-size: 15px; }
+        ul { margin-bottom: 20px; }
+        
+        .tab-nav {
+            display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: #e2e6ea; color: #333; border: none; padding: 10px 20px;
+            border-radius: 30px; cursor: pointer; font-weight: 600; transition: 0.3s;
+            text-decoration: none; display: inline-block; width: auto; font-size: 14px;
+        }
+        .tab-btn:hover, .tab-btn.active { background: #27ae60; color: white; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">
+            <img src="images/logo.png" alt="Ayurneeds Logo">
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn">Home</a>
+             <a href="contact.html" class="nav-btn">Contact</a>
+            <a href="about.html" class="nav-btn">About</a>
+            <a href="store.html" class="nav-btn">Store</a>
+           
+            <a href="admin.html" class="nav-btn">Admin Login</a>
+        </div>
+    </header>
+
+    <div class="policy-container">
+        <h1>📜 Terms & Policies</h1>
+
+        <div class="tab-nav">
+            <a href="#privacy" class="tab-btn">Privacy Policy</a>
+            <a href="#terms" class="tab-btn">Terms of Use</a>
+            <a href="#refund" class="tab-btn">Refunds & Returns</a>
+            <a href="#shipping" class="tab-btn">Shipping</a>
+        </div>
+
+        <section id="privacy">
+            <h2>1. Privacy Policy</h2>
+            <p>At <strong>Ayurneeds</strong>, we take your data privacy seriously.</p>
+            <ul>
+                <li><strong>Prescription Data:</strong> Images uploaded are processed by AI solely for extraction purposes and are stored securely. We do not share medical history with third parties.</li>
+                <li><strong>Phone Numbers:</strong> Used only for order updates via WhatsApp/SMS.</li>
+                <li><strong>Payment Data:</strong> We do not store UPI pins or banking passwords. All payments are verified via Transaction IDs (UTR).</li>
+            </ul>
+        </section>
+
+        <section id="terms">
+            <h2>2. Terms & Conditions</h2>
+            <p>By using this website, you agree to the following:</p>
+            <ul>
+                <li><strong>Valid Prescription:</strong> You confirm that the prescription uploaded is genuine and issued by a registered medical practitioner.</li>
+                <li><strong>AI Disclaimer:</strong> Our AI system assists in reading prescriptions but the final verification is done by a certified pharmacist before dispatch.</li>
+                <li><strong>Misuse:</strong> Uploading fake or forged prescriptions will lead to an immediate ban.</li>
+            </ul>
+        </section>
+
+        <section id="refund">
+            <h2>3. Return & Refund Policy</h2>
+            <p>Due to health and safety regulations, medicines typically cannot be returned. However:</p>
+            <ul>
+                <li><strong>Damaged/Wrong Items:</strong> If you receive a damaged or incorrect medicine, please contact us within 24 hours for a full replacement or refund.</li>
+                <li><strong>Cancellations:</strong> Orders can be cancelled only before they are "Out for Delivery".</li>
+                <li><strong>Refund Process:</strong> Refunds for cancelled orders are processed via UPI within 2-3 business days.</li>
+            </ul>
+        </section>
+
+        <section id="shipping">
+            <h2>4. Shipping Policy</h2>
+            <p>We currently serve the <strong>Shivamogga</strong> region.</p>
+            <ul>
+                <li><strong>Standard Delivery:</strong> Delivered within 24 hours of order confirmation.</li>
+                <li><strong>Express Delivery:</strong> Available for urgent prescriptions (delivered within 4 hours).</li>
+                <li><strong>Charges:</strong> Free delivery on orders above ₹500. A flat fee of ₹40 applies otherwise.</li>
+            </ul>
+        </section>
+
+        <hr style="margin: 40px 0; border: 0; border-top: 1px solid #eee;">
+        
+        <p style="text-align: center; font-size: 14px; color: #888;">
+            For legal queries, contact us at: <a href="mailto:mphytolinks@gmail.com" style="color:#27ae60;">mphytolinks@gmail.com</a>
+        </p>
+    </div>
+
+</body>
+</html>
