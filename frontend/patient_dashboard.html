@@ -128,15 +128,23 @@
             <small id="pincodeError" style="color:red; display:none;">❌ Invalid Pincode</small>
 
             <div id="upiSection">
-                <h3 style="color:#27ae60;"><i class="fas fa-qrcode"></i> Scan to Pay</h3>
-                <div id="qrcode" style="display:flex; justify-content:center; margin: 20px auto;"></div>
-                <p style="font-weight:bold; color:#2c3e50;">Amount: ₹<span id="displayAmount">0</span></p>
-                <a id="payBtn" href="#" class="pay-link-btn" style="margin-bottom: 15px;"><i class="fas fa-mobile-alt"></i> Open UPI App</a>
-                
-                <p style="font-size:13px; color:#666; margin-top:15px;">Step 2: Enter 12-digit Transaction ID (UTR):</p>
-                <input type="text" id="txnId" class="txn-input" required placeholder="e.g. 321456879012" maxlength="18">
-                <small id="txnError" style="color:red; display:none;">❌ Invalid Transaction ID (Min 12 chars)</small>
-            </div>
+            <h3 style="color:#0d0905;"><i class="fas fa-qrcode"></i> Scan to Pay</h3>
+            <div id="qrcode" style="display:flex; justify-content:center; margin: 20px auto;"></div>
+
+            <p style="font-weight:bold; color:#2c3e50; margin-bottom: 15px;">
+                Amount: ₹<span id="displayAmount">0</span><p><b>OR</b></p>
+            </p>
+            
+            <a id="payBtn" href="#" class="store-pay-btn">
+                🚀 Pay with UPI App
+            </a>
+            
+            <p style="font-size:13px; color:#666; margin-bottom: 5px;">
+                Step 2: Enter Transaction ID (UTR) here:
+            </p>
+            <input type="text" id="txnId" class="txn-input" placeholder="Enter 12-digit Transaction ID" maxlength="18">
+            <small id="txnError" style="color:red; display:none;">❌ Invalid Transaction ID</small>
+        </div>
 
             <button type="submit" class="action-btn">✅ Confirm Order</button>
         </form>
@@ -323,7 +331,7 @@
                     <p style="font-size:12px; color:#888;">Save this ID to track your delivery.</p>
                 </div>
 
-                <a href="track.html" class="pay-link-btn" style="background:#2c3e50; font-size:16px;">Track Order Now</a>
+                <a href="track.html" class="pay-link-btn" style=" font-size:20px;">Track Order Now</a>
             </div>
         `;
     }
