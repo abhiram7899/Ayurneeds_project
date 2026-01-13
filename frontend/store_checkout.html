@@ -10,7 +10,7 @@
 
     <style>
         /* DASHBOARD SPECIFIC STYLES */
-        .table-responsive { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; } /* ✅ This makes the table scrollable */
         
         /* --- 🛠️ UPDATED QUANTITY CONTROLS (Compact) --- */
         .qty-controls { 
@@ -38,12 +38,17 @@
             background: transparent;
         }
         
-        .qty-val { font-weight: 600; min-width: 20px; text-align: center; }
+        .qty-val { 
+            font-weight: 600;
+            min-width: 20px; 
+            text-align: center; 
+        }
 
         .cancel-btn { background: #ffebee; color: #c62828; 
             border: 1px solid #ffcdd2; padding: 5px 10px; 
             border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
-        .total-row { font-weight: bold; font-size: 1.2em; background: #e8f5e9; color: #2e7d32; }
+        
+            .total-row { font-weight: bold; font-size: 1.2em; background: #e8f5e9; color: #2e7d32; }
         
         #verifyOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; text-align:center; padding-top:100px; }
         #upiSection { display: block; background: #fff; padding: 25px; border-radius: 10px; text-align: center; border: 2px dashed #27ae60; margin-top: 20px; }
@@ -81,24 +86,26 @@
     <div class="container">
         <h2>🛒 Your Shopping Cart</h2>
         
-        <table id="cartTable">
-            <thead>
-                <tr>
-                    <th style="width: 30%;">Medicine</th>
+        <div class="table-responsive">
+            <table id="cartTable">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Medicine</th>
                         <th style="width: 15%;">Price</th>
                         <th style="width: 20%; text-align:center;">Quantity</th>
                         <th style="width: 15%;">Total</th>
                         <th style="width: 15%;">Action</th>
-                </tr>
-            </thead>
-            <tbody id="cartBody"></tbody>
-            <tfoot>
-                <tr class="total-row">
-                    <td colspan="3">Grand Total:</td>
-                    <td colspan="2">₹<span id="grandTotal">0</span></td>
-                </tr>
-            </tfoot>
-        </table>
+                    </tr>
+                </thead>
+                <tbody id="cartBody"></tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="3">Grand Total:</td>
+                        <td colspan="2">₹<span id="grandTotal">0</span></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
 
         <button onclick="clearCart()" style="background:#e74c3c; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; margin-top:10px; width:auto; font-size:14px;">🗑 Empty Cart</button>
 
@@ -300,25 +307,8 @@
         }
     }
 
-    function startPollingStatus(orderId) {
-        const intervalId = setInterval(async () => {
-            try {
-                const res = await fetch(`${API_URL}/check-order-status/${orderId}`);
-                const data = await res.json();
-                
-                if (data.status === "Ordered") {
-                    clearInterval(intervalId);
-                    localStorage.removeItem('ayurCart'); 
-                    showSuccessScreen();
-                } else if (data.status === "Payment Failed") {
-                    clearInterval(intervalId);
-                    showFailureScreen();
-                }
-            } catch(e) {}
-        }, 3000); 
-    }
-
-    // Update this function to pass the orderId to the success screen
+    // ✅ Cleaned up: Removed duplicate function definition. 
+    // This function handles the polling and passing the orderId.
     function startPollingStatus(orderId) {
         const intervalId = setInterval(async () => {
             try {
