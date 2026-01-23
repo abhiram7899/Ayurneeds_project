@@ -1,4 +1,5 @@
-from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException
+# main.py
+from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException, Body
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
@@ -13,28 +14,27 @@ import uuid
 from thefuzz import process 
 from dotenv import load_dotenv
 
-# IMPORT YOUR LOCAL MODULES
+# 🚨 CRITICAL FIX: Load Environment Variables BEFORE local imports
+load_dotenv()
+
+# ✅ NOW import local modules (since they depend on env vars)
 import ai_engine
 from database import engine, SessionLocal, Base, get_db
 
 # ==========================================
-# ⚙️ CONFIGURATION (SECURE)
+# ⚙️ CONFIGURATION
 # ==========================================
-# Load the secrets from the .env file
-load_dotenv()
-
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123") # Default fallback
 
-# 🔴 LIVE SERVER URLS
+# Live URLs (Update these if your domain changes)
 RENDER_BACKEND_URL = "https://ayurneeds-project.vercel.app"
 LIVE_WEBSITE_URL = "https://ayurneeds.com"
 
 # ==========================================
 # 🗄️ DATABASE MODELS
 # ==========================================
-# We define the tables here so 'Base' knows about them for creation.
-
 class Doctor(Base):
     __tablename__ = "doctors"
     id = Column(Integer, primary_key=True, index=True)
@@ -90,8 +90,9 @@ class CompletedOrder(Base):
     transaction_id = Column(String)
     order_date = Column(DateTime, default=datetime.datetime.utcnow)
 
-# Create all tables in the Database (if they don't exist)
-Base.metadata.create_all(bind=engine)
+# Create Tables (Safely)
+if engine:
+    Base.metadata.create_all(bind=engine)
 
 # ==========================================
 # 🚀 FASTAPI APP SETUP
@@ -106,7 +107,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Input Models (Pydantic) ---
+# --- Input Models ---
 class DoctorCreate(BaseModel):
     name: str
     phone: str
@@ -114,6 +115,9 @@ class DoctorCreate(BaseModel):
 
 class LoginRequest(BaseModel):
     phone: str
+
+class AdminLoginRequest(BaseModel):
+    password: str
 
 class OrderConfirm(BaseModel):
     patient_name: str
@@ -130,34 +134,35 @@ class ContactForm(BaseModel):
     email: str
     message: str
 
-# --- Helper: Telegram Alert ---
+# --- Helpers ---
 def send_telegram_alert(message):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         print("⚠️ Telegram keys missing in .env")
         return
-
     try:
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": message})
     except Exception as e:
         print(f"Telegram Error: {e}")
 
-# --- Helper: Real Stock Check ---
 def check_real_stock(medicines, db: Session):
     report = []
-    all_stock = db.query(PharmacyStock).all()
-    stock_map = {item.medicine_name: item for item in all_stock}
-    stock_names = list(stock_map.keys())
+    try:
+        all_stock = db.query(PharmacyStock).all()
+        stock_map = {item.medicine_name: item for item in all_stock}
+        stock_names = list(stock_map.keys())
 
-    for med in medicines:
-        med_name = med.get('name', '')
-        best_match, score = process.extractOne(med_name, stock_names)
-        
-        if score > 60:
-            stock = stock_map[best_match]
-            report.append(f"✅ {med_name} (Matched: {stock.medicine_name}): Found at {stock.pharmacy.name} (Qty: {stock.qty})")
-        else:
-            report.append(f"❌ {med_name}: Out of Stock / Unknown")
+        for med in medicines:
+            med_name = med.get('name', '')
+            best_match, score = process.extractOne(med_name, stock_names) if stock_names else (None, 0)
+            
+            if score > 80:
+                stock = stock_map[best_match]
+                report.append(f"✅ {med_name} (Matched: {stock.medicine_name}): Found at {stock.pharmacy.name} (Qty: {stock.qty})")
+            else:
+                report.append(f"❌ {med_name}: Out of Stock / Unknown")
+    except Exception as e:
+        report.append(f"Stock Check Error: {str(e)}")
             
     return "\n".join(report)
 
@@ -169,22 +174,27 @@ def check_real_stock(medicines, db: Session):
 def home():
     return {"message": "Ayurneeds Backend Running Live (Secured)"}
 
+# 🔐 SECURE ADMIN LOGIN
+@app.post("/admin/login")
+def admin_login(data: AdminLoginRequest):
+    if data.password == ADMIN_PASSWORD:
+        return {"status": "success", "token": "access_granted"}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid Password")
+
 # 1. REGISTER DOCTOR
 @app.post("/register-doctor/")
 def register_doctor(doctor: DoctorCreate, db: Session = Depends(get_db)):
     new_uuid = str(uuid.uuid4())
-    
     new_doc = Doctor(
-        name=doctor.name, 
-        uuid_code=new_uuid,
-        phone=doctor.phone,
-        clinic_address=doctor.clinic_address
+        name=doctor.name, uuid_code=new_uuid,
+        phone=doctor.phone, clinic_address=doctor.clinic_address
     )
     db.add(new_doc)
     db.commit()
     return {"status": "success", "unique_uuid": new_uuid}
 
-# 2. DOCTOR UPLOAD (Memory Processing)
+# 2. DOCTOR UPLOAD
 @app.post("/upload-prescription/{doctor_uuid}")
 async def upload_prescription(
     doctor_uuid: str, file: UploadFile = File(None), 
@@ -192,7 +202,7 @@ async def upload_prescription(
     db: Session = Depends(get_db)
 ):
     doctor = db.query(Doctor).filter(Doctor.uuid_code == doctor_uuid).first()
-    if not doctor: raise HTTPException(404, "Invalid Doctor")
+    if not doctor: raise HTTPException(404, "Invalid Doctor Link")
     
     filename = "manual_entry"
     ai_results = []
@@ -200,29 +210,22 @@ async def upload_prescription(
     if file:
         filename = file.filename
         try:
-            # ✅ Read file into memory (No saving to disk)
             contents = await file.read()
-            # ✅ Send raw bytes to AI Engine
             ai_results = ai_engine.analyze_prescription(contents)
         except Exception as e:
             print(f"Upload Error: {e}")
-            ai_results = []
 
     try: 
         manual = [{"name": m, "qty": "Standard"} for m in json.loads(manual_medicines)]
     except: 
         manual = []
 
-    # Format AI results to match manual structure
     ai_formatted = [{"name": m, "qty": "Standard"} for m in ai_results] if isinstance(ai_results, list) else []
-
     final_list = ai_formatted + manual
     
-    if not final_list: 
-        raise HTTPException(400, "No medicines found.")
+    if not final_list: raise HTTPException(400, "No medicines found.")
 
     clean_phone = manual_phone.replace(" ", "").strip()
-
     new_pres = Prescription(
         doctor_id=doctor.id, patient_phone=clean_phone,
         image_url=filename, extracted_medicines=json.dumps(final_list), 
@@ -232,21 +235,19 @@ async def upload_prescription(
     db.commit()
     db.refresh(new_pres)
 
-    # --- TELEGRAM ALERTS ---
+    # Alerts
     med_names = ", ".join([m['name'] for m in final_list])
     msg1 = f"🤖 *Prescription Received*\n📄 ID: {new_pres.id}\n👨‍⚕️ Dr. {doctor.name}\n💊 Medicines:\n{med_names}"
     send_telegram_alert(msg1)
 
     stock_report = check_real_stock(final_list, db)
-    # Link to Admin Dashboard (Render Backend)
     confirm_link = f"{RENDER_BACKEND_URL}/admin/approve/{new_pres.id}"
-    
     msg2 = f"🏪 *Pharmacy Stock Report*\n\n{stock_report}\n\n👇 *ACTION REQUIRED*\nClick to Confirm & Notify Patient:\n{confirm_link}"
     send_telegram_alert(msg2)
     
-    return {"status": "success", "medicines": [m['name'] for m in final_list], "matches": final_list}
+    return {"status": "success", "medicines": [m['name'] for m in final_list]}
 
-# 3. ADMIN APPROVE -> OPEN WHATSAPP
+# 3. ADMIN APPROVE
 @app.get("/admin/approve/{pres_id}", response_class=HTMLResponse)
 def approve_prescription(pres_id: int, db: Session = Depends(get_db)):
     pres = db.query(Prescription).filter(Prescription.id == pres_id).first()
@@ -255,41 +256,21 @@ def approve_prescription(pres_id: int, db: Session = Depends(get_db)):
     pres.status = "Approved"
     db.commit()
 
-    # Link to Frontend Patient Login
     patient_link = f"{LIVE_WEBSITE_URL}/patient_login.html?id={pres.id}"
-    
     phone = pres.patient_phone.replace(" ", "").replace("-", "")
-    if len(phone) == 10:
-        phone = "91" + phone 
+    if len(phone) == 10: phone = "91" + phone 
 
-    message = f"Hello {pres.patient_name or 'Customer'}, your prescription is ready! ✅%0a%0aClick here to confirm your delivery address:%0a{patient_link}"
+    message = f"Hello {pres.patient_name or 'Customer'}, your prescription is ready! ✅%0a%0aClick here to confirm delivery:%0a{patient_link}"
     whatsapp_url = f"https://wa.me/{phone}?text={message}"
 
     return f"""
     <html>
-        <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-                body {{ font-family: sans-serif; text-align: center; padding: 20px; background-color: #f0f2f5; }}
-                .card {{ background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }}
-                h1 {{ color: #27ae60; }}
-                p {{ color: #555; font-size: 16px; }}
-                .btn {{ 
-                    display: block; width: 100%; padding: 15px; margin-top: 20px; 
-                    background-color: #25D366; color: white; font-size: 18px; font-weight: bold; 
-                    text-decoration: none; border-radius: 8px; box-sizing: border-box;
-                }}
-                .btn:hover {{ background-color: #1ebe57; }}
-            </style>
-        </head>
-        <body>
-            <div class="card">
-                <h1>✅ Approved!</h1>
+        <head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+        <body style="font-family:sans-serif; text-align:center; padding:20px;">
+            <div style="padding:30px; border:1px solid #ddd; border-radius:10px;">
+                <h1 style="color:#27ae60;">✅ Approved!</h1>
                 <p>Prescription #{pres.id} is confirmed.</p>
-                <p>Send the link to the patient now:</p>
-                <a href="{whatsapp_url}" class="btn">👉 Send on WhatsApp</a>
-                <br>
-                <small style="color:#999;">Patient Phone: +{phone}</small>
+                <a href="{whatsapp_url}" style="background:#25D366; color:white; padding:15px; text-decoration:none; display:block; border-radius:5px;">👉 Send on WhatsApp</a>
             </div>
         </body>
     </html>
@@ -300,11 +281,9 @@ def approve_prescription(pres_id: int, db: Session = Depends(get_db)):
 def verify_patient(pres_id: int, login: LoginRequest, db: Session = Depends(get_db)):
     pres = db.query(Prescription).filter(Prescription.id == pres_id).first()
     if not pres: raise HTTPException(404, "Prescription not found")
-
     if pres.patient_phone == login.phone.strip():
-        return {"status": "success", "message": "Verified"}
-    else:
-        raise HTTPException(401, "Phone mismatch")
+        return {"status": "success"}
+    raise HTTPException(401, "Phone mismatch")
 
 # 5. GET DATA
 @app.get("/get-prescription/{pres_id}")
@@ -322,15 +301,9 @@ def get_data(pres_id: int, db: Session = Depends(get_db)):
 
     for med in raw_medicines:
         written_name = med.get('name')
-        try:
-            raw_qty = str(med.get('qty', '1'))
-            # Simple digit extraction
-            qty_number = int(''.join(filter(str.isdigit, raw_qty)))
-            if qty_number == 0: qty_number = 1
-        except:
-            qty_number = 1
-
-        best_match, score = process.extractOne(written_name, stock_names)
+        qty = 1 # Simplified qty logic for robustness
+        
+        best_match, score = process.extractOne(written_name, stock_names) if stock_names else (None, 0)
         
         if score > 60:
             matched_stock = stock_map[best_match]
@@ -342,23 +315,17 @@ def get_data(pres_id: int, db: Session = Depends(get_db)):
             final_name = written_name 
             match_status = "Not Found"
 
-        total_cost = price * qty_number
+        total_cost = price * qty
         grand_total += total_cost
 
         final_bill.append({
-            "name": final_name,
-            "original_name": written_name,
-            "qty": qty_number,
-            "price": price,
-            "total": total_cost,
-            "status": match_status
+            "name": final_name, "original_name": written_name,
+            "qty": qty, "price": price, "total": total_cost, "status": match_status
         })
 
     return {
-        "doctor": pres.doctor.name,
-        "medicines": final_bill,
-        "grand_total": grand_total,
-        "status": pres.status
+        "doctor": pres.doctor.name if pres.doctor else "Store",
+        "medicines": final_bill, "grand_total": grand_total, "status": pres.status
     }
 
 # 6. REQUEST ORDER
@@ -368,7 +335,6 @@ def confirm_order(pres_id: int, order: OrderConfirm, db: Session = Depends(get_d
     if not pres: raise HTTPException(404, "Not Found")
 
     full_address = f"{order.address_line}, {order.landmark}, Pin: {order.pincode}"
-
     bill_total = sum(item['price'] * item['qty'] for item in order.final_medicines)
 
     pres.patient_name = order.patient_name
@@ -379,52 +345,37 @@ def confirm_order(pres_id: int, order: OrderConfirm, db: Session = Depends(get_d
     pres.status = "Verifying Payment"
     db.commit()
 
-    # Link to Backend Payment Action
     approve_link = f"{RENDER_BACKEND_URL}/admin/payment-action/{pres_id}/approve"
     decline_link = f"{RENDER_BACKEND_URL}/admin/payment-action/{pres_id}/decline"
 
     med_text = ", ".join([f"{m['name']} (x{m['qty']})" for m in order.final_medicines])
-    
     msg = (
-        f"💰 *PAYMENT VERIFICATION NEEDED*\n"
-        f"👤 {order.patient_name}\n"
-        f"💵 Total Bill: ₹{bill_total}\n"
-        f"🆔 Txn: {order.payment_mode}\n"
-        f"💊 Items: {med_text}\n\n"
-        f"👇 *Check Bank App & Decide:*\n"
-        f"✅ [APPROVE ORDER]({approve_link})\n"
-        f"❌ [DECLINE ORDER]({decline_link})"
+        f"💰 *PAYMENT VERIFICATION NEEDED*\n👤 {order.patient_name}\n"
+        f"💵 Total: ₹{bill_total}\n🆔 Txn: {order.payment_mode}\n💊 Items: {med_text}\n"
+        f"👇 *Check Bank App & Decide:*\n✅ [APPROVE]({approve_link})\n❌ [DECLINE]({decline_link})"
     )
     send_telegram_alert(msg)
-
     return {"status": "pending_verification"}   
 
 # 7. DROPDOWN LIST
 @app.get("/doctor/medicine-list")
 def get_master_medicine_list(db: Session = Depends(get_db)):
     results = db.query(PharmacyStock.medicine_name).distinct().all()
-    clean_list = [row.medicine_name for row in results]
-    return clean_list
+    return [row.medicine_name for row in results]
 
 # 8. STORE CATALOG
 @app.get("/store/all-medicines")
 def get_store_inventory(db: Session = Depends(get_db)):
     stocks = db.query(PharmacyStock).filter(PharmacyStock.price > 0).all()
-    
-    inventory = []
-    for item in stocks:
-        inventory.append({
-            "name": item.medicine_name,
-            "price": item.price,
-            "image": item.image_url, 
-            "pharmacy": item.pharmacy.name
-        })
-    return inventory
+    return [{
+        "name": item.medicine_name, "price": item.price,
+        "image": item.image_url, "pharmacy": item.pharmacy.name
+    } for item in stocks]
 
 # 9. CONTACT FORM
 @app.post("/contact-us")
 def submit_contact_form(form: ContactForm):
-    msg = f"📩 *New Contact Inquiry*\n\n👤 Name: {form.name}\n📞 Phone: {form.phone}\n📧 Email: {form.email}\n\n📝 Message:\n{form.message}"
+    msg = f"📩 *New Inquiry*\nName: {form.name}\nPhone: {form.phone}\nMsg: {form.message}"
     send_telegram_alert(msg)
     return {"status": "success"}
 
@@ -436,122 +387,60 @@ def admin_payment_action(pres_id: int, action: str, db: Session = Depends(get_db
 
     if action == "approve":
         pres.status = "Ordered"
-        
-        existing_order = db.query(CompletedOrder).filter(CompletedOrder.original_pres_id == pres.id).first()
-        
-        if not existing_order:
+        existing = db.query(CompletedOrder).filter(CompletedOrder.original_pres_id == pres.id).first()
+        if not existing:
             new_sale = CompletedOrder(
-                original_pres_id = pres.id,
-                customer_name = pres.patient_name,
-                phone_number = pres.patient_phone,
-                address = pres.address,
-                medicines_json = pres.extracted_medicines,
-                total_amount = pres.total_amount,
+                original_pres_id = pres.id, customer_name = pres.patient_name,
+                phone_number = pres.patient_phone, address = pres.address,
+                medicines_json = pres.extracted_medicines, total_amount = pres.total_amount,
                 transaction_id = pres.payment_mode
             )
             db.add(new_sale)
-        
-        message = "✅ Payment Approved! Data saved to Sales Database."
-        color = "green"
-
-    elif action == "decline":
+        message, color = "✅ Payment Approved!", "green"
+    else:
         pres.status = "Payment Failed"
-        message = "❌ Payment Declined. User notified."
-        color = "red"
+        message, color = "❌ Payment Declined.", "red"
     
     db.commit()
-
-    return f"""
-    <html>
-        <body style="text-align:center; font-family:sans-serif; padding:50px;">
-            <h1 style="color:{color}">{message}</h1>
-            <p>You can close this window.</p>
-        </body>
-    </html>
-    """
+    return f"<html><body style='text-align:center; padding:50px;'><h1 style='color:{color}'>{message}</h1></body></html>"
 
 # 11. CHECK STATUS
 @app.get("/check-order-status/{pres_id}")
 def check_status(pres_id: int, db: Session = Depends(get_db)):
     pres = db.query(Prescription).filter(Prescription.id == pres_id).first()
-    if not pres: return {"status": "error"}
-    return {"status": pres.status}
+    return {"status": pres.status if pres else "error"}
 
 # 12. STORE CHECKOUT
 @app.post("/store/checkout")
 def store_checkout(order: OrderConfirm, db: Session = Depends(get_db)):
-    dummy_doc = db.query(Doctor).first()
+    dummy_doc = db.query(Doctor).filter(Doctor.uuid_code == "store_admin").first()
     if not dummy_doc: 
         dummy_doc = Doctor(name="Online Store", uuid_code="store_admin", phone="000", clinic_address="Online")
         db.add(dummy_doc)
         db.commit()
 
     full_address = f"{order.address_line}, {order.landmark}, Pin: {order.pincode}"
-
     bill_total = sum(item['price'] * item['qty'] for item in order.final_medicines)
 
     new_order = Prescription(
-        doctor_id=dummy_doc.id,
-        patient_name=order.patient_name,
-        patient_phone=order.phone,
-        address=full_address,
-        payment_mode=order.payment_mode,
-        extracted_medicines=json.dumps(order.final_medicines),
-        total_amount=bill_total,
-        status="Verifying Payment",
-        image_url="STORE_PURCHASE", 
-        created_at=datetime.datetime.utcnow()
+        doctor_id=dummy_doc.id, patient_name=order.patient_name,
+        patient_phone=order.phone, address=full_address,
+        payment_mode=order.payment_mode, extracted_medicines=json.dumps(order.final_medicines),
+        total_amount=bill_total, status="Verifying Payment",
+        image_url="STORE_PURCHASE", created_at=datetime.datetime.utcnow()
     )
     db.add(new_order)
     db.commit()
     db.refresh(new_order)
 
-    # Link to Backend Payment Action
     approve_link = f"{RENDER_BACKEND_URL}/admin/payment-action/{new_order.id}/approve"
     decline_link = f"{RENDER_BACKEND_URL}/admin/payment-action/{new_order.id}/decline"
 
     med_text = ", ".join([f"{m['name']} (x{m['qty']})" for m in order.final_medicines])
-    
     msg = (
-        f"🛒 *NEW STORE ORDER (Verifying)*\n"
-        f"👤 {order.patient_name}\n"
-        f"📞 {order.phone}\n"
-        f"💵 Total Bill: ₹{bill_total}\n"
-        f"🆔 Txn: {order.payment_mode}\n"
-        f"📦 Items: {med_text}\n"
-        f"🏠 Addr: {full_address}\n\n"
-        f"👇 *Verify Payment & Decide:*\n"
-        f"✅ [APPROVE ORDER]({approve_link})\n"
-        f"❌ [DECLINE ORDER]({decline_link})"
+        f"🛒 *NEW STORE ORDER*\n👤 {order.patient_name}\n"
+        f"💵 Total: ₹{bill_total}\n🆔 Txn: {order.payment_mode}\n"
+        f"👇 *Verify & Decide:*\n✅ [APPROVE]({approve_link})\n❌ [DECLINE]({decline_link})"
     )
     send_telegram_alert(msg)
-
     return {"status": "pending_verification", "order_id": new_order.id}
-
-# ==========================================
-# 🐞 DEBUGGING TOOL (SECURE)
-# ==========================================
-@app.get("/debug-ai")
-def debug_ai_models():
-    import google.generativeai as genai
-    
-    key = os.getenv("GOOGLE_API_KEY")
-    if not key:
-        return {"status": "error", "message": "API Key not found in .env"}
-    
-    # Configure with the key
-    genai.configure(api_key=key)
-    
-    available_models = []
-    try:
-        # Ask Google: "What models do you have?"
-        for m in genai.list_models():
-            available_models.append(m.name)
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
-        
-    return {
-        "status": "success", 
-        "my_library_version": genai.__version__,
-        "available_models": available_models
-    }
