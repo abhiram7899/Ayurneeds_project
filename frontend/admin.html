@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel | Ayurneeds</title>
     <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* GLOBAL SETTINGS */
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
@@ -52,28 +52,22 @@
     </header>
 
     <div id="adminContent" class="admin-wrapper">
-        
         <div class="form-section">
             <h2>Register Doctor</h2>
             <p>Create a secure portal link for new doctors.</p>
-
             <div class="input-group">
                 <label>👨‍⚕️ Doctor Full Name</label>
                 <input type="text" id="docName" placeholder="e.g. Dr. Ravi Kumar">
             </div>
-
             <div class="input-group">
                 <label>📱 Mobile Number</label>
                 <input type="tel" id="docPhone" placeholder="e.g. 9988776655">
             </div>
-
             <div class="input-group">
                 <label>📍 Clinic Address / City</label>
                 <input type="text" id="docAddress" placeholder="e.g. Shivamogga">
             </div>
-
             <button onclick="registerDoctor()" class="generate-btn">✨ Generate Magic Link</button>
-
             <div id="successArea" class="success-card">
                 <h3>🎉 Registration Successful!</h3>
                 <p style="font-size: 13px; margin-bottom: 5px;">Send this link to the doctor:</p>
@@ -81,7 +75,6 @@
                 <button onclick="copyLink()" class="copy-btn">📋 Copy Link</button>
             </div>
         </div>
-
         <div class="visual-section">
             <div class="circle c1"></div>
             <div class="circle c2"></div>
@@ -89,12 +82,8 @@
                 <span class="admin-icon">🛡️</span>
                 <h1>Admin Control</h1>
                 <p>Manage your pharmacy network efficiently.</p>
-                <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.7;">
-                    Securely generate unique access tokens for doctors to upload prescriptions directly to your system.
-                </p>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -105,16 +94,36 @@
             if (sessionStorage.getItem("admin_access") === "true") {
                 showAdmin();
             } else {
-                const password = prompt("🔒 Enter Admin Password:");
-                if (password === "admin123") { 
+                requestLogin();
+            }
+        };
+
+        async function requestLogin() {
+            const password = prompt("🔒 Enter Admin Password:");
+            if (!password) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password: password })
+                });
+
+                if (res.ok) {
                     sessionStorage.setItem("admin_access", "true");
                     showAdmin();
                 } else {
                     alert("🚫 Wrong Password!");
-                    window.location.href = "index.html"; 
+                    window.location.href = "index.html";
                 }
+            } catch (e) {
+                alert("Server Error. Is the backend running?");
+                window.location.href = "index.html";
             }
-        };
+        }
 
         function showAdmin() {
             document.getElementById("adminContent").style.display = "grid";
@@ -147,8 +156,9 @@
 
                 const data = await response.json();
                 
-                // Construct Link
-                const magicLink = `${window.location.origin}${window.location.pathname.replace('admin.html', 'doctor.html')}?id=${data.unique_uuid}`;
+                // Construct Link - Logic ensures it works on both localhost and production
+                const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+                const magicLink = `${baseUrl}/doctor.html?id=${data.unique_uuid}`;
 
                 document.getElementById('successArea').style.display = "block";
                 document.getElementById('linkBox').innerText = magicLink;

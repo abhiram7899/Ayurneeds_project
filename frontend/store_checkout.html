@@ -9,52 +9,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
-        /* DASHBOARD SPECIFIC STYLES */
-        .table-responsive { overflow-x: auto; } /* ✅ This makes the table scrollable */
-        
-        /* --- 🛠️ UPDATED QUANTITY CONTROLS (Compact) --- */
-        .qty-controls { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            gap: 2px;
-        }
-        
-        .qty-btn { 
-            background: transparent !important;
-            border: none !important; 
-            color: #2c3e50; 
-            font-size: 1.5rem; 
-            font-weight: 800; 
-            cursor: pointer; 
-            padding: 0 8px;
-            width: auto !important;
-            box-shadow: none !important;
-        }
-        
-        .qty-btn:hover { 
-            color: #27ae60; 
-            transform: scale(1.2); 
-            background: transparent;
-        }
-        
-        .qty-val { 
-            font-weight: 600;
-            min-width: 20px; 
-            text-align: center; 
-        }
-
-        .cancel-btn { background: #ffebee; color: #c62828; 
-            border: 1px solid #ffcdd2; padding: 5px 10px; 
-            border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
-        
-            .total-row { font-weight: bold; font-size: 1.2em; background: #e8f5e9; color: #2e7d32; }
-        
+        .table-responsive { overflow-x: auto; }
+        .qty-controls { display: flex; align-items: center; justify-content: center; gap: 2px; }
+        .qty-btn { background: transparent !important; border: none !important; color: #2c3e50; font-size: 1.5rem; font-weight: 800; cursor: pointer; padding: 0 8px; width: auto !important; box-shadow: none !important; }
+        .qty-btn:hover { color: #27ae60; transform: scale(1.2); background: transparent; }
+        .qty-val { font-weight: 600; min-width: 20px; text-align: center; }
+        .cancel-btn { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .total-row { font-weight: bold; font-size: 1.2em; background: #e8f5e9; color: #2e7d32; }
         #verifyOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; text-align:center; padding-top:100px; }
         #upiSection { display: block; background: #fff; padding: 25px; border-radius: 10px; text-align: center; border: 2px dashed #27ae60; margin-top: 20px; }
         .txn-input { width: 100%; padding: 12px; border: 2px solid #edd9c8; border-radius: 8px; font-size: 16px; text-align: center; letter-spacing: 1px; margin-top:10px; }
-        
-        /* Orange theme for store buttons to differentiate */
         .store-pay-btn { display: inline-block; background: #e67e22; color: white; text-decoration: none; padding: 15px 30px; border-radius: 30px; font-size: 18px; font-weight: bold; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4); transition: 0.3s; }
         .store-pay-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(230, 126, 34, 0.6); }
     </style>
@@ -62,15 +26,13 @@
 <body>
 
     <header>
-        <a href="index.html" class="logo">
-        <img src="images/logo.png" alt="Ayurneeds Logo"></a>
+        <a href="index.html" class="logo"><img src="images/logo.png" alt="Ayurneeds Logo"></a>
         <div class="nav-links">
-            <a href="index.html" class="nav-btn ">Home</a>
+            <a href="index.html" class="nav-btn">Home</a>
             <a href="contact.html" class="nav-btn">Contact</a>
             <a href="about.html" class="nav-btn">About</a>
             <a href="store.html" class="nav-btn nav-primary">Store</a>
             <a href="track.html" class="nav-btn">Track Order</a>
-            
         </div>
     </header>
 
@@ -85,7 +47,6 @@
 
     <div class="container">
         <h2>🛒 Your Shopping Cart</h2>
-        
         <div class="table-responsive">
             <table id="cartTable">
                 <thead>
@@ -134,13 +95,9 @@
                 Amount: ₹<span id="displayAmount">0</span><p><b>OR</b></p>
             </p>
             
-            <a id="payBtn" href="#" class="store-pay-btn">
-                🚀 Pay with UPI App
-            </a>
+            <a id="payBtn" href="#" class="store-pay-btn">🚀 Pay with UPI App</a>
             
-            <p style="font-size:13px; color:#666; margin-bottom: 5px;">
-                Step 2: Enter Transaction ID (UTR) here:
-            </p>
+            <p style="font-size:13px; color:#666; margin-bottom: 5px;">Step 2: Enter Transaction ID (UTR) here:</p>
             <input type="text" id="txnId" class="txn-input" placeholder="Enter 12-digit Transaction ID" maxlength="18">
             <small id="txnError" style="color:red; display:none;">❌ Invalid Transaction ID</small>
         </div>
@@ -150,8 +107,9 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-    const SHOP_UPI_ID = "9988776655@okaxis"; 
+    const SHOP_UPI_ID = "7204061517@ptyes"; 
     const SHOP_NAME = "Ayurneeds Pharmacy";
+    // ⬇️ UPDATE THIS TO http://127.0.0.1:8000 FOR LOCAL TESTING
     const API_URL = "https://ayurneeds-project.vercel.app"; 
     
     let cart = JSON.parse(localStorage.getItem('ayurCart')) || [];
@@ -207,12 +165,7 @@
         const upiLink = `upi://pay?pa=${SHOP_UPI_ID}&pn=${SHOP_NAME}&am=${amount}&cu=INR`;
         document.getElementById('payBtn').href = upiLink;
 
-        new QRCode(qrContainer, {
-            text: upiLink,
-            width: 150,
-            height: 150,
-            correctLevel : QRCode.CorrectLevel.H
-        });
+        new QRCode(qrContainer, { text: upiLink, width: 150, height: 150, correctLevel : QRCode.CorrectLevel.H });
     }
 
     function updateQty(index, change) {
@@ -307,18 +260,19 @@
         }
     }
 
-    // ✅ Cleaned up: Removed duplicate function definition. 
-    // This function handles the polling and passing the orderId.
     function startPollingStatus(orderId) {
         const intervalId = setInterval(async () => {
             try {
-                const res = await fetch(`${API_URL}/check-order-status/${orderId}`);
+                // ✅ CACHE BUSTING FIX APPLIED HERE
+                const res = await fetch(`${API_URL}/check-order-status/${orderId}?t=${Date.now()}`);
                 const data = await res.json();
                 
+                console.log("Status:", data.status); // Debugging
+
                 if (data.status === "Ordered") {
                     clearInterval(intervalId);
                     localStorage.removeItem('ayurCart'); 
-                    showSuccessScreen(orderId); // ✅ Pass ID here
+                    showSuccessScreen(orderId);
                 } else if (data.status === "Payment Failed") {
                     clearInterval(intervalId);
                     showFailureScreen();
@@ -327,21 +281,18 @@
         }, 3000); 
     }
 
-    // Updated Success Screen showing the ID
     function showSuccessScreen(orderId) {
         document.body.innerHTML = `
             <div style="text-align:center; padding:80px 20px; font-family:sans-serif;">
                 <div style="font-size:80px;">🎉</div>
                 <h1 style="color:#27ae60;">Payment Verified!</h1>
                 <p>Your store order has been confirmed.</p>
-
                 <div style="background:#f0f2f5; padding:20px; border-radius:15px; margin:20px auto; max-width:400px;">
                     <p style="margin:0; color:#555; font-size:14px;">YOUR TRACKING ID</p>
                     <h2 style="margin:5px 0; color:#333; font-size:40px;">#${orderId}</h2>
                     <p style="font-size:12px; color:#888;">Save this ID to track your delivery.</p>
                 </div>
-
-                <a href="track.html" class="pay-link-btn" style=" font-size:20px;">Track Order Now</a>
+                <a href="track.html" class="store-pay-btn" style="font-size:20px;">Track Order Now</a>
             </div>
         `;
     }
